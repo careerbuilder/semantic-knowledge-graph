@@ -5,6 +5,7 @@ import com.careerbuilder.search.relevancy.Models.ResponseNode;
 import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
+import jdk.nashorn.internal.ir.RuntimeNode;
 import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.util.ContentStream;
@@ -31,13 +32,8 @@ public class RelatednessRequestHandler extends RequestHandlerBase
     public void handleRequestBody(SolrQueryRequest solrReq, SolrQueryResponse solrRsp)
             throws Exception {
         RelatednessRequest request = parsePost(solrReq);
-        ResponseNode [] response = new ResponseNode[2];
-        response[0] = new ResponseNode(request.compare[0].type);
-        response[0].values = new ResponseValue[2];
-        response[0].values[0] = new ResponseValue("value1", 1.0);
-        response[0].values[1] = new ResponseValue("value2", 1.0);
-        response[1] = new ResponseNode(request.compare[1].type);
-        solrRsp.add("relatednessResponse", response);
+        RequestTreeRecurser recurser = new RequestTreeRecurser(request, solrReq);
+        solrRsp.add("relatednessResponse", recurser.score());
     }
 
     private RelatednessRequest parsePost(SolrQueryRequest request) throws IOException {
