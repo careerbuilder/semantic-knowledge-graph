@@ -5,6 +5,7 @@ import com.careerbuilder.search.relevancy.Models.ResponseNode;
 import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import jdk.nashorn.internal.ir.RuntimeNode;
 import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.solr.common.SolrException;
@@ -38,7 +39,11 @@ public class RelatednessRequestHandler extends RequestHandlerBase
 
     private RelatednessRequest parsePost(SolrQueryRequest request) throws IOException {
         String inputString = getPostString(request);
-        return new Gson().fromJson(inputString, RelatednessRequest.class);
+        try {
+            return new Gson().fromJson(inputString, RelatednessRequest.class);
+        } catch (Exception e) {
+            throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, e.getMessage());
+        }
     }
 
     private String getPostString(SolrQueryRequest request) throws IOException {

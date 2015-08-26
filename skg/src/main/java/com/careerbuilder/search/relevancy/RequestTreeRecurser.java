@@ -47,6 +47,7 @@ public class RequestTreeRecurser {
     private void recurse(NodeContext context, ResponseNode parentResponse, RequestNode[] requests) throws IOException {
         if(requests != null) {
             for (ResponseValue value : parentResponse.values) {
+                //TODO - filter context appropriately
                 ResponseNode [] responses = generator.transform(context, requests, null);
                 value.children = scorer.transform(context, requests, responses);
                 for (int i = 0; i < requests.length; ++i) {
