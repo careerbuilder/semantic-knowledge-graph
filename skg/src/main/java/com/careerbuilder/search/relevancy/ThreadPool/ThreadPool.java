@@ -39,16 +39,17 @@ public class ThreadPool
     {
         try {
             for(int i = 0; i < array.length; ++i) {
-                synchronized(array[i]) {
-                    if(!array[i].done) {
-                        array[i].wait();
+                if(array[i] != null) {
+                    synchronized (array[i]) {
+                        if (!array[i].done) {
+                            array[i].wait();
+                        }
                     }
-                }
-                if(array[i].e != null)
-                {
-                    throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
-                            array[i].e.getMessage(),
-                            array[i].e);
+                    if (array[i].e != null) {
+                        throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
+                                array[i].e.getMessage(),
+                                array[i].e);
+                    }
                 }
             }
         } catch (InterruptedException e) {
@@ -59,9 +60,10 @@ public class ThreadPool
 
     public static void multiplex(Runnable [] array)
     {
-        for(int i = 0; i < array.length; ++i)
-        {
-            getInstance().execute(array[i]);
+        for(int i = 0; i < array.length; ++i) {
+            if(array[i] != null) {
+                getInstance().execute(array[i]);
+            }
         }
     }
 

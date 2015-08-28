@@ -3,6 +3,7 @@ package com.careerbuilder.search.relevancy;
 import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.*;
 
@@ -12,39 +13,59 @@ import java.util.List;
 
 public class NodeContext {
 
-    public SolrIndexSearcher searcher;
+    public RelatednessRequest request;
     public SolrQueryRequest req;
+    public SolrParams invariants;
     public List<Query> queries;
     public List<Query> fgQueries;
     public List<Query> bgQueries;
+    public DocListAndSet queryDomainList;
     public DocSet queryDomain;
     public DocSet fgDomain;
     public DocSet bgDomain;
 
-    public NodeContext(RelatednessRequest request, SolrQueryRequest req) throws IOException
+    @Deprecated
+    public NodeContext(RelatednessRequest request)
     {
-        this.searcher = req.getSearcher();
+        this.request = request;
+    }
+
+    @Deprecated
+    public NodeContext(SolrParams invariants)
+    {
+        this.invariants = invariants;
+    }
+
+    public NodeContext(RelatednessRequest request, SolrQueryRequest req, SolrParams invariants) throws IOException
+    {
+        this.request = request;
         this.req = req;
+        this.invariants = invariants;
         this.queries = parseQueryStrings(request.queries);
-        this.fgQueries = parseQueryStrings(request.foreground_queries);
+        if(request.foreground_queries == null) {
+            this.fgQueries = this.queries;
+        }
+        else {
+            this.fgQueries = parseQueryStrings(request.foreground_queries);
+        }
         this.bgQueries = parseQueryStrings(request.background_queries);
         this.fgQueries.addAll(bgQueries);
-        this.queryDomain = searcher.getDocSet(queries);
-        this.fgDomain= searcher.getDocSet(fgQueries);
-        this.bgDomain = searcher.getDocSet(bgQueries);
+        this.queryDomain = req.getSearcher().getDocSet(queries);
+        this.fgDomain= req.getSearcher().getDocSet(fgQueries);
+        this.bgDomain = req.getSearcher().getDocSet(bgQueries);
     }
 
     // copy constructor
     public NodeContext(NodeContext parent, Query filterQuery) throws IOException
     {
-        this.searcher = parent.searcher;
         this.req = parent.req;
+        this.invariants = parent.invariants;
         this.queries = parent.queries;
         this.fgQueries = parent.fgQueries;
         this.bgQueries = parent.bgQueries;
-        this.queryDomain = searcher.getDocSet(filterQuery, parent.queryDomain);
-        this.fgDomain= searcher.getDocSet(filterQuery, parent.fgDomain);
-        this.bgDomain= searcher.getDocSet(filterQuery, parent.bgDomain);
+        this.queryDomain = req.getSearcher().getDocSet(filterQuery, parent.queryDomain);
+        this.fgDomain= req.getSearcher().getDocSet(filterQuery, parent.fgDomain);
+        this.bgDomain= parent.bgDomain;
     }
 
     public NodeContext() {}

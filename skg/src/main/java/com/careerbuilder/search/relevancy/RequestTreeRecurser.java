@@ -1,35 +1,36 @@
 package com.careerbuilder.search.relevancy;
 
+import com.careerbuilder.search.relevancy.Generation.NodeGenerator;
 import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
 import com.careerbuilder.search.relevancy.Models.RequestNode;
 import com.careerbuilder.search.relevancy.Models.ResponseNode;
 import com.careerbuilder.search.relevancy.Models.ResponseValue;
+import com.careerbuilder.search.relevancy.Scoring.NodeScorer;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.TermQuery;
+import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 
 import java.io.IOException;
-import java.util.LinkedList;
 
 public class RequestTreeRecurser {
 
     private RelatednessRequest request;
-    private SolrQueryRequest solrReq;
     private NodeContext baseContext;
     private RecursionOp generator;
     private RecursionOp scorer;
 
-    public RequestTreeRecurser(RelatednessRequest request, SolrQueryRequest solrReq) throws IOException {
-        this(request, solrReq, new NodeGenerator(), new NodeScorer());
+    public RequestTreeRecurser(NodeContext context) throws IOException {
+        this(context, new NodeGenerator(), new NodeScorer());
     }
 
-    public RequestTreeRecurser(RelatednessRequest request,
-                               SolrQueryRequest solrReq,
+    public RequestTreeRecurser(NodeContext context,
                                RecursionOp generator,
                                RecursionOp scorer) throws IOException {
         this.generator = generator;
         this.scorer = scorer;
-        this.request = request;
-        this.solrReq = solrReq;
-        this.baseContext = new NodeContext(request, solrReq);
+        this.request = context.request;
+        this.baseContext = context;
     }
 
     public ResponseNode[] score() throws IOException {
@@ -44,14 +45,14 @@ public class RequestTreeRecurser {
         return responses;
     }
 
-    private void recurse(NodeContext context, ResponseNode parentResponse, RequestNode[] requests) throws IOException {
+    private void recurse(NodeContext parentContext, ResponseNode parentResponse, RequestNode[] requests) throws IOException {
         if(requests != null) {
             for (ResponseValue value : parentResponse.values) {
-                //TODO - filter context appropriately
+                TermQuery filter = new TermQuery(new Term(parentResponse.type, value.value));
+                NodeContext context = new NodeContext(parentContext, filter);
                 ResponseNode [] responses = generator.transform(context, requests, null);
                 value.children = scorer.transform(context, requests, responses);
                 for (int i = 0; i < requests.length; ++i) {
-                    //TODO - filter context appropriately
                     recurse(context, value.children[i], requests[i].children);
                 }
             }

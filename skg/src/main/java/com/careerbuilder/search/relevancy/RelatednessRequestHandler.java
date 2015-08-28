@@ -33,7 +33,8 @@ public class RelatednessRequestHandler extends RequestHandlerBase
     public void handleRequestBody(SolrQueryRequest solrReq, SolrQueryResponse solrRsp)
             throws Exception {
         RelatednessRequest request = parsePost(solrReq);
-        RequestTreeRecurser recurser = new RequestTreeRecurser(request, solrReq);
+        NodeContext context = new NodeContext(request, solrReq, invariants);
+        RequestTreeRecurser recurser = new RequestTreeRecurser(context);
         solrRsp.add("relatednessResponse", recurser.score());
     }
 
