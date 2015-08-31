@@ -44,7 +44,7 @@ public class NodeGenerator implements RecursionOp {
     {
         FacetRunner [] runners = new FacetRunner[requests.length];
         for(int i = 0; i < requests.length; ++i) {
-            if(requests[i].discoverValues || requests[i].values == null) {
+            if(requests[i].discoverValues) {
                 String field = new FacetFieldAdapter(context).getFacetField(requests[i].type);
                 // populate required docListAndSet once and only if necessary
                 if(context.queryDomainList == null) {

@@ -43,14 +43,12 @@ public class FacetRunner extends Waitable{
     }
 
     public void facet() throws IOException {
-        if (requestNode.values == null || requestNode.values.length == 0) {
-            FacetModule mod = new FacetModule();
-            SolrQueryResponse resp = new SolrQueryResponse();
-            ResponseBuilder rb = getResponseBuilder(resp);
-            mod.prepare(rb);
-            mod.process(rb);
-            responses = parseResponse(resp);
-        }
+        FacetModule mod = new FacetModule();
+        SolrQueryResponse resp = new SolrQueryResponse();
+        ResponseBuilder rb = getResponseBuilder(resp);
+        mod.prepare(rb);
+        mod.process(rb);
+        responses = parseResponse(resp);
     }
 
     private ResponseBuilder getResponseBuilder(SolrQueryResponse resp) throws IOException {
@@ -64,20 +62,22 @@ public class FacetRunner extends Waitable{
     private List<ResponseValue> parseResponse(SolrQueryResponse resp) {
         SimpleOrderedMap<Object> facet = (SimpleOrderedMap<Object>)((SimpleOrderedMap<Object>)resp.getValues()
                 .get("facets")).get("fieldFacet");
-        List<Object> buckets = (List<Object>)facet.get("buckets");
-
         LinkedList<ResponseValue> values = new LinkedList<>();
-        for(int i =0; i <buckets.size(); ++i)
-        {
-            SimpleOrderedMap<Object> bucket = (SimpleOrderedMap<Object>)buckets.get(i);
-            values.add(new ResponseValue((String) bucket.get("val"), Double.valueOf((Integer)bucket.get("count"))));
+        if(facet != null) {
+            List<Object> buckets = (List<Object>) facet.get("buckets");
+
+            for(int i =0; i <buckets.size(); ++i)
+            {
+                SimpleOrderedMap<Object> bucket = (SimpleOrderedMap<Object>)buckets.get(i);
+                values.add(new ResponseValue((String) bucket.get("val"), Double.valueOf((Integer)bucket.get("count"))));
+            }
         }
         return values;
     }
 
     public Map<String, Object> buildFacetJson()
     {
-        int limit = 10 + 2*requestNode.limit;
+        int limit = 2*Math.min(requestNode.limit, 25);
         LinkedHashMap<String, Object> wrapper = new LinkedHashMap<>();
         LinkedHashMap<String, Object> facetName = new LinkedHashMap<>();
         LinkedHashMap<String, Object> type= new LinkedHashMap<>();

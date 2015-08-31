@@ -36,6 +36,7 @@ public class RequestTreeRecurser {
     public ResponseNode[] score() throws IOException {
         ResponseNode[] responses = null;
         if(request.compare != null) {
+            setDefaults(request.compare);
             responses = generator.transform(baseContext, request.compare, null);
             responses = scorer.transform(baseContext, request.compare, responses);
             for(int i = 0; i < request.compare.length; ++i) {
@@ -47,8 +48,9 @@ public class RequestTreeRecurser {
 
     private void recurse(NodeContext parentContext, ResponseNode parentResponse, RequestNode[] requests) throws IOException {
         if(requests != null) {
+            setDefaults(requests);
             for (ResponseValue value : parentResponse.values) {
-                TermQuery filter = new TermQuery(new Term(parentResponse.type, value.value));
+                TermQuery filter = new TermQuery(new Term(parentResponse.type, value.value.toLowerCase()));
                 NodeContext context = new NodeContext(parentContext, filter);
                 ResponseNode [] responses = generator.transform(context, requests, null);
                 value.children = scorer.transform(context, requests, responses);
@@ -56,6 +58,16 @@ public class RequestTreeRecurser {
                     recurse(context, value.children[i], requests[i].children);
                 }
             }
+        }
+    }
+
+    private void setDefaults(RequestNode [] requests)
+    {
+        for(RequestNode request: requests) {
+            if (request.values == null || request.values.length == 0) {
+                request.discoverValues = true;
+            }
+            request.limit = request.limit == 0 ? 10 : request.limit;
         }
     }
 }

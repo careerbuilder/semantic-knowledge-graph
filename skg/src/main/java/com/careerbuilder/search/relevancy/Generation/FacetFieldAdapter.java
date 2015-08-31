@@ -13,25 +13,24 @@ public class FacetFieldAdapter {
     }
 
     public String getFacetField(String field) {
-        String facetField = field;
         String extension = context.invariants.get(field + ".extension", "");
-        if(!extension.equals(""))
-        {
-            facetField = makeDefault(field, extension);
-        }
+        String facetField = makeDefault(field, extension);
         return checkField(field, facetField);
     }
 
     private String makeDefault(String field, String extension) {
         StringBuilder facetField = new StringBuilder();
-        int first = field.indexOf(".");
-        int second = field.indexOf(".", first+1);
-        if(second > 0) {
-            String suffix = field.substring(second);
-            facetField.append(field.substring(0, second)).append(".").append(extension).append(suffix);
-        }
-        else{
-            facetField.append(field).append(".").append(extension);
+        if(extension.equals("")) {
+            facetField.append(field);
+        } else {
+            int first = field.indexOf(".");
+            int second = field.indexOf(".", first + 1);
+            if (second > 0) {
+                String suffix = field.substring(second);
+                facetField.append(field.substring(0, second)).append(".").append(extension).append(suffix);
+            } else {
+                facetField.append(field).append(".").append(extension);
+            }
         }
         return facetField.append(".cs").toString();
     }
