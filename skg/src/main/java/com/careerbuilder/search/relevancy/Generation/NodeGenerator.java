@@ -26,15 +26,15 @@ public class NodeGenerator implements RecursionOp {
     }
 
     private void mergeResponseValues(RequestNode request, ResponseNode resp, FacetRunner runner) {
-        int genLength = runner == null ? 0 : runner.responses.size();
+        int genLength = runner == null ? 0 : runner.results.size();
         int requestValsLength = request.values == null ? 0 : request.values.length;
         resp.values = new ResponseValue[requestValsLength + genLength];
         int k = 0;
         for (; k < requestValsLength; ++k) {
-                resp.values[k] = new ResponseValue(request.values[k], -1);
+                resp.values[k] = new ResponseValue(request.values[k], 0);
         }
         if(runner != null) {
-            for (ResponseValue genValue : runner.responses) {
+            for (ResponseValue genValue : runner.results) {
                 resp.values[k++] = genValue;
             }
         }
