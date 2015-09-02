@@ -22,13 +22,13 @@ public class NodeScorer implements RecursionOp {
             ThreadPool.multiplex(bgRunners);
             ThreadPool.demultiplex(fgRunners);
             ThreadPool.demultiplex(bgRunners);
-            buildResponse(context, responses[i], fgRunners, bgRunners);
+            buildResponse(responses[i], fgRunners, bgRunners);
             processResponse(context, responses[i], requests[i]);
         }
         return responses;
     }
 
-    private void buildResponse(NodeContext context, ResponseNode response, QueryRunner[] fgRunners, QueryRunner[] bgRunners) {
+    private void buildResponse(ResponseNode response, QueryRunner[] fgRunners, QueryRunner[] bgRunners) {
         for(int k = 0; k < fgRunners.length; ++k) {
             if(fgRunners[k] != null) {
                 response.values[k].magnitude = fgRunners[k].result;

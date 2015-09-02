@@ -3,7 +3,6 @@ package com.careerbuilder.search.relevancy.Runnable;
 import com.careerbuilder.search.relevancy.Models.RequestNode;
 import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.careerbuilder.search.relevancy.NodeContext;
-import com.careerbuilder.search.relevancy.Runnable.Waitable;
 import com.google.gson.Gson;
 import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.MapSolrParams;
@@ -13,7 +12,6 @@ import org.apache.solr.handler.component.ResponseBuilder;
 import org.apache.solr.request.LocalSolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.schema.SchemaField;
 import org.apache.solr.search.facet.FacetModule;
 
 import java.io.IOException;
@@ -23,7 +21,7 @@ public class FacetRunner extends Waitable{
 
     final NodeContext context;
     RequestNode requestNode;
-    public List<ResponseValue> responses;
+    public List<ResponseValue> results;
     String field;
     Gson gson;
 
@@ -48,7 +46,7 @@ public class FacetRunner extends Waitable{
         ResponseBuilder rb = getResponseBuilder(resp);
         mod.prepare(rb);
         mod.process(rb);
-        responses = parseResponse(resp);
+        results = parseResponse(resp);
     }
 
     private ResponseBuilder getResponseBuilder(SolrQueryResponse resp) throws IOException {
