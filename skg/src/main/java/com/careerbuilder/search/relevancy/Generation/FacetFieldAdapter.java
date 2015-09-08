@@ -13,7 +13,7 @@ public class FacetFieldAdapter {
     }
 
     public String getFacetField(String field) {
-        String extension = context.invariants.get(field + ".extension", "");
+        String extension = context.parameterSet.invariants.get(field + ".extension", "");
         String facetField = makeDefault(field, extension);
         return checkField(field, facetField);
     }

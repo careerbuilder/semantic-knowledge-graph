@@ -1,5 +1,6 @@
 package com.careerbuilder.search.relevancy;
 
+import com.careerbuilder.search.relevancy.Models.ParameterSet;
 import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
 import com.careerbuilder.search.relevancy.Models.ResponseNode;
 import com.careerbuilder.search.relevancy.Models.ResponseValue;
@@ -9,6 +10,7 @@ import com.google.gson.JsonSyntaxException;
 import jdk.nashorn.internal.ir.RuntimeNode;
 import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.params.MapSolrParams;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.handler.RequestHandlerBase;
@@ -33,7 +35,8 @@ public class RelatednessRequestHandler extends RequestHandlerBase
     public void handleRequestBody(SolrQueryRequest solrReq, SolrQueryResponse solrRsp)
             throws Exception {
         RelatednessRequest request = parsePost(solrReq);
-        NodeContext context = new NodeContext(request, solrReq, invariants);
+        ParameterSet parameterSet = new ParameterSet(solrReq.getParams(), defaults, invariants);
+        NodeContext context = new NodeContext(request, solrReq, parameterSet);
         RequestTreeRecurser recurser = new RequestTreeRecurser(context);
         solrRsp.add("relatednessResponse", recurser.score());
     }

@@ -1,5 +1,6 @@
 package com.careerbuilder.search.relevancy;
 
+import com.careerbuilder.search.relevancy.Models.ParameterSet;
 import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
@@ -15,7 +16,7 @@ public class NodeContext {
 
     public RelatednessRequest request;
     public SolrQueryRequest req;
-    public SolrParams invariants;
+    public ParameterSet parameterSet;
     public List<Query> queries;
     public List<Query> fgQueries;
     public List<Query> bgQueries;
@@ -31,16 +32,16 @@ public class NodeContext {
     }
 
     @Deprecated
-    public NodeContext(SolrParams invariants)
+    public NodeContext(ParameterSet parameterSet)
     {
-        this.invariants = invariants;
+        this.parameterSet = parameterSet;
     }
 
-    public NodeContext(RelatednessRequest request, SolrQueryRequest req, SolrParams invariants) throws IOException
+    public NodeContext(RelatednessRequest request, SolrQueryRequest req, ParameterSet parameterSet) throws IOException
     {
         this.request = request;
         this.req = req;
-        this.invariants = invariants;
+        this.parameterSet = parameterSet;
         this.queries = parseQueryStrings(request.queries);
         if(request.foreground_queries == null) {
             this.fgQueries = this.queries;
@@ -59,7 +60,7 @@ public class NodeContext {
     public NodeContext(NodeContext parent, Query filterQuery) throws IOException
     {
         this.req = parent.req;
-        this.invariants = parent.invariants;
+        this.parameterSet = parent.parameterSet;
         this.queries = parent.queries;
         this.fgQueries = parent.fgQueries;
         this.bgQueries = parent.bgQueries;
