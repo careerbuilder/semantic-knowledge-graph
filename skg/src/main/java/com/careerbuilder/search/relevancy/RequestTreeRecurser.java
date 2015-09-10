@@ -67,7 +67,8 @@ public class RequestTreeRecurser {
             if (request.values == null || request.values.length == 0) {
                 request.discoverValues = true;
             }
-            request.limit = request.limit == 0 ? 10 : request.limit;
+            int limit = request.values == null || request.values.length == 0 ? 10 : request.values.length;
+            request.limit = request.limit == 0 ? limit : request.limit;
         }
     }
 }
