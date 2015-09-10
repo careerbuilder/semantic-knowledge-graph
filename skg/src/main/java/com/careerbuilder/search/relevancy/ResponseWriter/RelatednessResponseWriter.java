@@ -1,6 +1,8 @@
 package com.careerbuilder.search.relevancy.ResponseWriter;
 
+import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
@@ -22,7 +24,7 @@ public class RelatednessResponseWriter implements QueryResponseWriter{
 
     public void write(Writer writer, SolrQueryRequest request, SolrQueryResponse response) throws IOException
     {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().registerTypeAdapter(ResponseValue.class, new ResponseValueSerializer()).create();
         Exception e = response.getException();
         int status = (int)response.getResponseHeader().get("status");
         if(e == null) {

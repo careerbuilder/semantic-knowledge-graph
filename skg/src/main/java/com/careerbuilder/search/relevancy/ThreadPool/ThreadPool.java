@@ -8,7 +8,7 @@ import java.util.LinkedList;
 public class ThreadPool
 {
     private final PoolWorker[] threads;
-    private final LinkedList<Runnable> queue;
+    private final LinkedList<Waitable> queue;
     private static ThreadPool instance;
 
     public static synchronized ThreadPool getInstance() {
@@ -18,7 +18,7 @@ public class ThreadPool
 
     public ThreadPool()
     {
-        queue = new LinkedList<Runnable>();
+        queue = new LinkedList<>();
         int nThreads = Math.min(Runtime.getRuntime().availableProcessors(), 1);
         threads = new PoolWorker[nThreads];
 
@@ -28,9 +28,9 @@ public class ThreadPool
         }
     }
 
-    public void execute(Runnable r) {
+    public void execute(Waitable w) {
         synchronized(queue) {
-            queue.addLast(r);
+            queue.addLast(w);
             queue.notify();
         }
     }
@@ -58,7 +58,7 @@ public class ThreadPool
         }
     }
 
-    public static void multiplex(Runnable [] array)
+    public static void multiplex(Waitable [] array)
     {
         for(int i = 0; i < array.length; ++i) {
             if(array[i] != null) {
@@ -69,22 +69,25 @@ public class ThreadPool
 
     private class PoolWorker extends Thread {
         public void run() {
-            Waitable r;
+            Waitable w;
             while (true) {
                 synchronized(queue) {
                     while (queue.isEmpty()) {
                         try {
                             queue.wait();
                         }
-                        catch (InterruptedException ignored) {}
+                        catch (InterruptedException e) {
+                            throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
+                                    "Parallel operation interrupted");
+                        }
                     }
-                    r = (Waitable) queue.removeFirst();
+                    w = queue.removeFirst();
                 }
                 try {
-                    r.run();
+                    w.run();
                 }
                 catch (Exception e) {
-                   r.e = e;
+                   w.e = e;
                 }
             }
         }
