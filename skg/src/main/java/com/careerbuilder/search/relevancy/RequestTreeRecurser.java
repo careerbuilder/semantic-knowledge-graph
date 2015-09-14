@@ -5,6 +5,7 @@ import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
 import com.careerbuilder.search.relevancy.Models.RequestNode;
 import com.careerbuilder.search.relevancy.Models.ResponseNode;
 import com.careerbuilder.search.relevancy.Models.ResponseValue;
+import com.careerbuilder.search.relevancy.Normalization.NodeNormalizer;
 import com.careerbuilder.search.relevancy.Scoring.NodeScorer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.TermQuery;
@@ -17,16 +18,19 @@ public class RequestTreeRecurser {
 
     private RelatednessRequest request;
     private NodeContext baseContext;
+    private RecursionOp normalizer;
     private RecursionOp generator;
     private RecursionOp scorer;
 
     public RequestTreeRecurser(NodeContext context) throws IOException {
-        this(context, new NodeGenerator(), new NodeScorer());
+        this(context, new NodeNormalizer(), new NodeGenerator(), new NodeScorer());
     }
 
     public RequestTreeRecurser(NodeContext context,
+                               RecursionOp normalizer,
                                RecursionOp generator,
                                RecursionOp scorer) throws IOException {
+        this.normalizer = normalizer;
         this.generator = generator;
         this.scorer = scorer;
         this.request = context.request;
@@ -37,6 +41,7 @@ public class RequestTreeRecurser {
         ResponseNode[] responses = null;
         if(request.compare != null) {
             setDefaults(request.compare);
+            normalizer.transform(baseContext, request.compare, null);
             responses = generator.transform(baseContext, request.compare, null);
             responses = scorer.transform(baseContext, request.compare, responses);
             for(int i = 0; i < request.compare.length; ++i) {
@@ -52,6 +57,7 @@ public class RequestTreeRecurser {
             for (ResponseValue value : parentResponse.values) {
                 TermQuery filter = new TermQuery(new Term(parentResponse.type, value.value.toLowerCase()));
                 NodeContext context = new NodeContext(parentContext, filter);
+                normalizer.transform(context, requests, null);
                 ResponseNode [] responses = generator.transform(context, requests, null);
                 value.children = scorer.transform(context, requests, responses);
                 for (int i = 0; i < requests.length; ++i) {

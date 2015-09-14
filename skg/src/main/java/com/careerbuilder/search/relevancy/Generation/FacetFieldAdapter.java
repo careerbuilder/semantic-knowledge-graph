@@ -1,6 +1,5 @@
 package com.careerbuilder.search.relevancy.Generation;
 
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.careerbuilder.search.relevancy.NodeContext;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.util.SimpleOrderedMap;
@@ -13,38 +12,46 @@ public class FacetFieldAdapter {
     static final String FACET_FIELD_VALUE_DELIMITER= "^";
 
     public String field;
+    public String baseField;
     private String facetFieldExtension;
 
     public FacetFieldAdapter(NodeContext context, String field)
     {
+
         this.context = context;
         this.facetFieldExtension = context.parameterSet.invariants.get(field + ".facet-field", "");
-        this.field = buildFacetField(field);
+        checkField(field, field);
+        this.baseField = field;
+        this.field = buildField(field);
     }
 
-    public ResponseValue buildResponseValue(SimpleOrderedMap<Object> bucket) {
-        String value = (String) bucket.get("val");
-        ResponseValue resp = new ResponseValue(value.replace(FACET_FIELD_VALUE_DELIMITER, " "));
+    public SimpleOrderedMap<String> getMapValue(SimpleOrderedMap<Object> bucket) {
+        SimpleOrderedMap<String> result = null;
         if(facetFieldExtension != null && !facetFieldExtension.equals("")) {
-            resp.facetValue = new SimpleOrderedMap<String>();
+            result = new SimpleOrderedMap<>();
+            String value = (String) bucket.get("val");
             String[] facetFieldKeys = facetFieldExtension.split(FACET_FIELD_DELIMITER);
             String[] facetFieldValues = value.split("\\"+FACET_FIELD_VALUE_DELIMITER);
             for (int i = 0; i < facetFieldKeys.length && i < facetFieldValues.length; ++i) {
-                resp.facetValue.add(facetFieldKeys[i], facetFieldValues[i]);
+                result.add(facetFieldKeys[i], facetFieldValues[i]);
             }
         }
-        return resp;
+        return result;
     }
 
-    private String buildFacetField(String field) {
-        String facetField = makeDefault(field, facetFieldExtension);
+    public String getStringValue(SimpleOrderedMap<Object> bucket)
+    {
+        String value = (String) bucket.get("val");
+        return value.replace(FACET_FIELD_VALUE_DELIMITER, " ");
+    }
+
+    private String buildField(String field) {
+        String facetField = extendField(field, facetFieldExtension);
         checkField(field, facetField);
         return facetField;
     }
 
-    // to get the facet field:
-    // append the facet field extension if it exists, then .cs
-    private String makeDefault(String field, String extension) {
+    private String extendField(String field, String extension) {
         StringBuilder facetField = new StringBuilder();
         if(extension.equals("")) {
             facetField.append(field);
@@ -54,6 +61,11 @@ public class FacetFieldAdapter {
         return facetField.append(".cs").toString();
     }
 
+    public boolean hasExtension()
+    {
+        return facetFieldExtension != null && !facetFieldExtension.equals("");
+    }
+
     private void checkField(String inputField, String facetField) {
         try {
             context.req.getCore()
@@ -61,7 +73,7 @@ public class FacetFieldAdapter {
                     .getField(facetField).getName();
         } catch (SolrException e) {
             throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
-                    "Values of type \"" + inputField + "\" cannot be generated automatically" +
+                    "Values of type \"" + inputField + "\" cannot be generated automatically or normalized" +
                     "(adapted as \"" + facetField + "\")");
         }
     }
