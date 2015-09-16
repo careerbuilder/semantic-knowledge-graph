@@ -29,8 +29,8 @@ public class FacetRunner extends Waitable{
     public List<SimpleOrderedMap<Object>> buckets;
     public String facetQuery;
     final NodeContext context;
-    private static final String FIELD_FACET_NAME = "fieldFacet";
-    private static final String QUERY_FACET_NAME = "queryFacet";
+    public static final String FIELD_FACET_NAME = "fieldFacet";
+    public static final String QUERY_FACET_NAME = "queryFacet";
 
     public FacetRunner(NodeContext context, String facetQuery, String field, int limit) {
         this(context, field, limit);
@@ -109,8 +109,6 @@ public class FacetRunner extends Waitable{
         wrapper.put("facet", queryFacetName);
         return wrapper;
     }
-
-
 
     // see above
     public SolrParams buildFacetParams()
