@@ -65,7 +65,7 @@ public class RequestTreeRecurser {
     {
         for(RequestNode request: requests) {
             if (request.values == null || request.values.length == 0) {
-                request.discoverValues = true;
+                request.discover_values = true;
             }
             int limit = request.values == null || request.values.length == 0 ? 10 : request.values.length;
             request.limit = request.limit == 0 ? limit : request.limit;
