@@ -79,8 +79,9 @@ public class RelatednessRequestHandler extends RequestHandlerBase
     //////////////////////// SolrInfoMBeans methods //////////////////////
 
     @Override
-    public String getDescription() {
-        return "Parses a phrase";
+    public String getDescription()
+    {
+        return "Scores fields using passed in foreground/background";
     }
 
     @Override

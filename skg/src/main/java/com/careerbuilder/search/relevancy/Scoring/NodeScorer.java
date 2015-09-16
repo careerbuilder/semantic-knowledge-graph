@@ -7,10 +7,13 @@ import com.careerbuilder.search.relevancy.RecursionOp;
 import com.careerbuilder.search.relevancy.Runnable.QueryRunner;
 import com.careerbuilder.search.relevancy.ThreadPool.ThreadPool;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.solr.search.DocSet;
 import org.apache.solr.search.SolrIndexSearcher;
+
+import java.util.Arrays;
 
 public class NodeScorer implements RecursionOp {
 
@@ -60,7 +63,8 @@ public class NodeScorer implements RecursionOp {
                                           DocSet domain, ResponseNode response) {
         QueryRunner [] runners = new QueryRunner[response.values.length];
         for(int k = 0; k < response.values.length; ++k) {
-            Query query = new TermQuery(new Term(response.type, response.values[k].value.toLowerCase()));
+            PhraseQuery query = new PhraseQuery();
+            Arrays.asList(response.values[k].value.toLowerCase().split(" ")).forEach(t->query.add(new Term(response.type, t)));
             runners[k] = new QueryRunner(searcher, query, domain);
         }
         return runners;

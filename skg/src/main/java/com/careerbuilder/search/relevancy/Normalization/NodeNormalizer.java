@@ -36,12 +36,7 @@ public class NodeNormalizer implements RecursionOp {
                 LinkedList<SimpleOrderedMap<String>> normalizedMaps= new LinkedList<>();
                 for(int k = 0; k < requests[i].values.length; ++k)
                 {
-                    int j = 0;
-                    for(; j < runners[n].buckets.size(); ++j) {
-                        normalizedStrings.add(adapters[i].getStringValue(runners[n].buckets.get(j)));
-                        normalizedMaps.add(adapters[i].getMapValue(runners[n].buckets.get(j)));
-                    }
-                    if(j == 0) {
+                    if(!populateNorms(adapters[i], runners[n], requests[i].values[k], normalizedStrings, normalizedMaps)) {
                         normalizedStrings.add(requests[i].values[k]);
                         normalizedMaps.add(null);
                     }
@@ -51,6 +46,23 @@ public class NodeNormalizer implements RecursionOp {
                 requests[i].values = normalizedStrings.toArray(new String[normalizedStrings.size()]);
             }
         }
+    }
+
+    private boolean populateNorms(FacetFieldAdapter adapter,
+                                  FacetRunner runner,
+                                  String inputValue,
+                                  LinkedList<String> normalizedStrings,
+                                  LinkedList<SimpleOrderedMap<String>> normalizedMaps) {
+        int j = 0;
+        while(j < runner.buckets.size()){
+            String normString = adapter.getStringValue(runner.buckets.get(j));
+            if(normString.toLowerCase().contains(inputValue.toLowerCase())) {
+                normalizedStrings.add(normString);
+                normalizedMaps.add(adapter.getMapValue(runner.buckets.get(j)));
+            }
+            ++j;
+        }
+        return j != 0;
     }
 
     public FacetRunner [] buildRunners(NodeContext context, RequestNode [] requests, FacetFieldAdapter [] adapters) throws IOException
@@ -67,7 +79,7 @@ public class NodeNormalizer implements RecursionOp {
                                 context.req.getSearcher().getDocListAndSet(new MatchAllDocsQuery(),
                                         context.queryDomain, Sort.INDEXORDER, 0, 0);
                     }
-                    String facetQuery = buildFacetQuery(adapters[i].baseField, requests[i].values[k]);
+                    String facetQuery = buildFacetQuery(adapters[i].baseField, requests[i].values[k].toLowerCase());
                     runners[n++] = new FacetRunner(context, facetQuery, adapters[i].field, DEFAULT_NORM_LIMIT);
                 }
             }

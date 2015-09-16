@@ -27,10 +27,10 @@ public class FacetRunner extends Waitable{
     private int limit;
     private String field;
     public List<SimpleOrderedMap<Object>> buckets;
+    public String facetQuery;
     final NodeContext context;
     private static final String FIELD_FACET_NAME = "fieldFacet";
     private static final String QUERY_FACET_NAME = "queryFacet";
-    private String facetQuery;
 
     public FacetRunner(NodeContext context, String facetQuery, String field, int limit) {
         this(context, field, limit);

@@ -32,17 +32,26 @@ public class NodeGenerator implements RecursionOp {
         int genLength = runner == null ? 0 : runner.buckets.size();
         int requestValsLength = request.values == null ? 0 : request.values.length;
         resp.values = new ResponseValue[requestValsLength + genLength];
+        int k = addPassedInValues(request, resp);
+        if(runner != null) {
+            addGeneratedValues(resp, runner, adapter, k);
+        }
+    }
+
+    private int addPassedInValues(RequestNode request, ResponseNode resp) {
         int k = 0;
-        for (; k < requestValsLength; ++k) {
-            resp.values[k] = new ResponseValue(request.values[k], 0);
+        for (; k < resp.values.length; ++k) {
+            resp.values[k] = new ResponseValue(request.values[k]);
             resp.values[k].normalizedValue = request.normalizedValues == null ? null : request.normalizedValues.get(k);
         }
-        if(runner != null) {
-            for (SimpleOrderedMap<Object> bucket: runner.buckets) {
-                ResponseValue respValue = new ResponseValue(adapter.getStringValue(bucket));
-                respValue.normalizedValue = adapter.getMapValue(bucket);
-                resp.values[k++] = respValue;
-            }
+        return k;
+    }
+
+    private void addGeneratedValues(ResponseNode resp, FacetRunner runner, FacetFieldAdapter adapter, int k) {
+        for (SimpleOrderedMap<Object> bucket: runner.buckets) {
+            ResponseValue respValue = new ResponseValue(adapter.getStringValue(bucket));
+            respValue.normalizedValue = adapter.getMapValue(bucket);
+            resp.values[k++] = respValue;
         }
     }
 
