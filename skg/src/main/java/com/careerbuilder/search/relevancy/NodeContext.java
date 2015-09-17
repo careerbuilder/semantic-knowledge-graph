@@ -4,7 +4,6 @@ import com.careerbuilder.search.relevancy.Models.ParameterSet;
 import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
-import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.*;
 

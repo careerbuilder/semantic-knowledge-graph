@@ -1,13 +1,6 @@
 package com.careerbuilder.search.relevancy.Runnable;
 
-import com.careerbuilder.search.relevancy.Generation.FacetFieldAdapter;
-import com.careerbuilder.search.relevancy.Models.RequestNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.careerbuilder.search.relevancy.NodeContext;
-import com.google.gson.Gson;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
 import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.MapSolrParams;
 import org.apache.solr.common.params.SolrParams;

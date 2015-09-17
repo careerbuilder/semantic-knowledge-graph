@@ -8,8 +8,6 @@ import com.careerbuilder.search.relevancy.Runnable.QueryRunner;
 import com.careerbuilder.search.relevancy.ThreadPool.ThreadPool;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.PhraseQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
 import org.apache.solr.search.DocSet;
 import org.apache.solr.search.SolrIndexSearcher;
 

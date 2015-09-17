@@ -1,9 +1,6 @@
 package com.careerbuilder.search.relevancy.Runnable;
 
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.TopFieldDocs;
-import org.apache.lucene.search.highlight.Highlighter;
 import org.apache.solr.search.DocSet;
 import org.apache.solr.search.SolrIndexSearcher;
 
