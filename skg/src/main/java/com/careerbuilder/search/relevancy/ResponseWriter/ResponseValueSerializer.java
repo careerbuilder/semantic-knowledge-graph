@@ -23,7 +23,7 @@ public class ResponseValueSerializer implements JsonSerializer<ResponseValue> {
         resp.addProperty("magnitude", src.magnitude);
         resp.addProperty("popularity", src.popularity);
 
-        resp.add("children", context.serialize(src.children));
+        resp.add("compare", context.serialize(src.compare));
         return resp;
     }
 

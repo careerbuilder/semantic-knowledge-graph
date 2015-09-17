@@ -7,10 +7,6 @@ import com.careerbuilder.search.relevancy.Models.ResponseNode;
 import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.careerbuilder.search.relevancy.Normalization.NodeNormalizer;
 import com.careerbuilder.search.relevancy.Scoring.NodeScorer;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.TermQuery;
-import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.request.SolrQueryRequest;
 
 import java.io.IOException;
 
@@ -47,7 +43,7 @@ public class RequestTreeRecurser {
             responses = generator.transform(baseContext, request.compare, null);
             responses = scorer.transform(baseContext, request.compare, responses);
             for(int i = 0; i < request.compare.length; ++i) {
-                recurse(baseContext, responses[i], request.compare[i].children);
+                recurse(baseContext, responses[i], request.compare[i].compare);
             }
         }
         return responses;
@@ -62,9 +58,9 @@ public class RequestTreeRecurser {
                     normalizer.transform(context, requests, null);
                 }
                 ResponseNode [] responses = generator.transform(context, requests, null);
-                value.children = scorer.transform(context, requests, responses);
+                value.compare = scorer.transform(context, requests, responses);
                 for (int i = 0; i < requests.length; ++i) {
-                    recurse(context, value.children[i], requests[i].children);
+                    recurse(context, value.compare[i], requests[i].compare);
                 }
             }
         }
