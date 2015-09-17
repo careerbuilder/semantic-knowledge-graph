@@ -11,7 +11,7 @@ public class RelatednessStrategy {
     }
 
     private static double sigmoid(double x) {
-        return x / (1 + Math.abs(x));
+        return x / (10 + Math.abs(x));
     }
 }
 

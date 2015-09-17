@@ -49,7 +49,6 @@ public class NodeContext {
             this.fgQueries = parseQueryStrings(request.foreground_queries);
         }
         this.bgQueries = parseQueryStrings(request.background_queries);
-        this.fgQueries.addAll(bgQueries);
         this.queryDomain = req.getSearcher().getDocSet(queries);
         this.fgDomain= req.getSearcher().getDocSet(fgQueries);
         this.bgDomain = req.getSearcher().getDocSet(bgQueries);
