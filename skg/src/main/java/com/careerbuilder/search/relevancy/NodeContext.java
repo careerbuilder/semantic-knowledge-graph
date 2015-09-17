@@ -59,6 +59,7 @@ public class NodeContext {
     public NodeContext(NodeContext parent, String filterQueryString) throws IOException
     {
         this.req = parent.req;
+        this.request = parent.request;
         this.parameterSet = parent.parameterSet;
         this.queries = parent.queries;
         this.fgQueries = parent.fgQueries;

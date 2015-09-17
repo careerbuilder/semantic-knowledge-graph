@@ -41,7 +41,9 @@ public class RequestTreeRecurser {
         ResponseNode[] responses = null;
         if(request.compare != null) {
             setDefaults(request.compare);
-            normalizer.transform(baseContext, request.compare, null);
+            if(baseContext.request.normalize) {
+                normalizer.transform(baseContext, request.compare, null);
+            }
             responses = generator.transform(baseContext, request.compare, null);
             responses = scorer.transform(baseContext, request.compare, responses);
             for(int i = 0; i < request.compare.length; ++i) {
@@ -56,7 +58,9 @@ public class RequestTreeRecurser {
             setDefaults(requests);
             for (ResponseValue value : parentResponse.values) {
                 NodeContext context = new NodeContext(parentContext, parentResponse.type+":"+value.value.toLowerCase());
-                normalizer.transform(context, requests, null);
+                if(context.request.normalize) {
+                    normalizer.transform(context, requests, null);
+                }
                 ResponseNode [] responses = generator.transform(context, requests, null);
                 value.children = scorer.transform(context, requests, responses);
                 for (int i = 0; i < requests.length; ++i) {
