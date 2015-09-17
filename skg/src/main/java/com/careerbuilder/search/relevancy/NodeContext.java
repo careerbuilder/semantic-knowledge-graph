@@ -4,7 +4,6 @@ import com.careerbuilder.search.relevancy.Models.ParameterSet;
 import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
-import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.*;
 
@@ -57,15 +56,16 @@ public class NodeContext {
     }
 
     // copy constructor
-    public NodeContext(NodeContext parent, Query filterQuery) throws IOException
+    public NodeContext(NodeContext parent, String filterQueryString) throws IOException
     {
         this.req = parent.req;
+        this.request = parent.request;
         this.parameterSet = parent.parameterSet;
         this.queries = parent.queries;
         this.fgQueries = parent.fgQueries;
         this.bgQueries = parent.bgQueries;
-        this.queryDomain = req.getSearcher().getDocSet(filterQuery, parent.queryDomain);
-        this.fgDomain= req.getSearcher().getDocSet(filterQuery, parent.fgDomain);
+        this.queryDomain = req.getSearcher().getDocSet(parseQueryString(filterQueryString), parent.queryDomain);
+        this.fgDomain= req.getSearcher().getDocSet(parseQueryString(filterQueryString), parent.fgDomain);
         this.bgDomain= parent.bgDomain;
     }
 
@@ -75,16 +75,20 @@ public class NodeContext {
         if(qStrings != null) {
             LinkedList<Query> queryList = new LinkedList<Query>();
             for (String qString : qStrings) {
-                try {
-                    QParser parser = QParser.getParser(qString, null, req);
-                    queryList.add(parser.getQuery());
-                } catch (SyntaxError e) {
-                    throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
-                            "Syntax error in query: " + qString + ".");
-                }
+                queryList.add(parseQueryString(qString));
             }
             return queryList;
         }
         return null;
+    }
+
+    private Query parseQueryString(String qString) {
+        try {
+            QParser parser = QParser.getParser(qString, null, req);
+            return parser.getQuery();
+        } catch (SyntaxError e) {
+            throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
+                    "Syntax error in query: " + qString + ".");
+        }
     }
 }

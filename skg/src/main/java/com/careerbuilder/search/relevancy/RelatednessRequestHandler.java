@@ -2,15 +2,10 @@ package com.careerbuilder.search.relevancy;
 
 import com.careerbuilder.search.relevancy.Models.ParameterSet;
 import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
-import com.careerbuilder.search.relevancy.Models.ResponseNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import jdk.nashorn.internal.ir.RuntimeNode;
 import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.solr.common.SolrException;
-import org.apache.solr.common.params.MapSolrParams;
 import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.handler.RequestHandlerBase;
@@ -79,8 +74,9 @@ public class RelatednessRequestHandler extends RequestHandlerBase
     //////////////////////// SolrInfoMBeans methods //////////////////////
 
     @Override
-    public String getDescription() {
-        return "Parses a phrase";
+    public String getDescription()
+    {
+        return "Scores fields using passed in foreground/background";
     }
 
     @Override

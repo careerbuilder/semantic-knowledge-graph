@@ -1,10 +1,6 @@
 package com.careerbuilder.search.relevancy.Runnable;
 
-import com.careerbuilder.search.relevancy.Generation.FacetFieldAdapter;
-import com.careerbuilder.search.relevancy.Models.RequestNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.careerbuilder.search.relevancy.NodeContext;
-import com.google.gson.Gson;
 import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.MapSolrParams;
 import org.apache.solr.common.params.SolrParams;
@@ -21,17 +17,23 @@ import java.util.*;
 public class FacetRunner extends Waitable{
 
 
+    private int limit;
+    private String field;
+    public List<SimpleOrderedMap<Object>> buckets;
+    public String facetQuery;
     final NodeContext context;
-    RequestNode requestNode;
-    public List<ResponseValue> results;
-    private FacetFieldAdapter adapter;
-    Gson gson;
+    public static final String FIELD_FACET_NAME = "fieldFacet";
+    public static final String QUERY_FACET_NAME = "queryFacet";
 
-    public FacetRunner(NodeContext context, RequestNode requestNode) {
-        this.gson = new Gson();
-        this.requestNode = requestNode;
+    public FacetRunner(NodeContext context, String facetQuery, String field, int limit) {
+        this(context, field, limit);
+        this.facetQuery = facetQuery;
+    }
+
+    public FacetRunner(NodeContext context, String field, int limit) {
         this.context = context;
-        adapter = new FacetFieldAdapter(context, requestNode.type);
+        this.field = field;
+        this.limit = limit;
     }
 
     public void run()
@@ -48,7 +50,7 @@ public class FacetRunner extends Waitable{
         ResponseBuilder rb = getResponseBuilder(resp);
         mod.prepare(rb);
         mod.process(rb);
-        results = parseResponse(resp);
+        parseResponse(resp);
     }
 
     private ResponseBuilder getResponseBuilder(SolrQueryResponse resp) throws IOException {
@@ -60,36 +62,44 @@ public class FacetRunner extends Waitable{
     }
 
     // this is kind of awkward, but necessary since JsON faceting is protected in Solr,
-    // (we can only interact with it by mocking up a request and parsing a resposne).
-    private List<ResponseValue> parseResponse(SolrQueryResponse resp) {
-        SimpleOrderedMap<Object> facet = (SimpleOrderedMap<Object>)((SimpleOrderedMap<Object>)resp.getValues()
-                .get("facets")).get("fieldFacet");
-        LinkedList<ResponseValue> values = new LinkedList<>();
+    // (we can only interact with it by mocking up a request and parsing a response).
+    private void parseResponse(SolrQueryResponse resp) {
+        SimpleOrderedMap<Object> facet = (SimpleOrderedMap<Object>)
+                ((SimpleOrderedMap<Object>)((SimpleOrderedMap<Object>) resp.getValues()).get("facets")).get(QUERY_FACET_NAME);
         if(facet != null) {
-            List<Object> buckets = (List<Object>) facet.get("buckets");
-
-            for(int i =0; i <buckets.size(); ++i)
+            SimpleOrderedMap<Object> innerFacet = (SimpleOrderedMap<Object>)facet.get(FIELD_FACET_NAME);
+            if(innerFacet != null)
             {
-                SimpleOrderedMap<Object> bucket = (SimpleOrderedMap<Object>)buckets.get(i);
-                values.add(adapter.buildResponseValue(bucket));
+                buckets = (List<SimpleOrderedMap<Object>>)innerFacet.get("buckets");
+            } else {
+                buckets = new LinkedList<>();
             }
+        } else {
+            buckets = new LinkedList<>();
         }
-        return values;
     }
 
     // see above
     public Map<String, Object> buildFacetJson()
     {
-        int limit = 2*Math.max(requestNode.limit, 25);
+        int limit = 2*Math.max(this.limit, 25);
         LinkedHashMap<String, Object> wrapper = new LinkedHashMap<>();
-        LinkedHashMap<String, Object> facetName = new LinkedHashMap<>();
-        LinkedHashMap<String, Object> type= new LinkedHashMap<>();
-        LinkedHashMap<String, Object> facet = new LinkedHashMap<>();
-        facet.put("field", adapter.field);
-        facet.put("limit", limit);
-        type.put("field", facet);
-        facetName.put("fieldFacet", type);
-        wrapper.put("facet", facetName);
+        LinkedHashMap<String, Object> queryFacetName = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> queryFacetWrapper= new LinkedHashMap<>();
+        LinkedHashMap<String, Object> queryFacet= new LinkedHashMap<>();
+        LinkedHashMap<String, Object> fieldFacetName = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> fieldFacetWrapper= new LinkedHashMap<>();
+        LinkedHashMap<String, Object> fieldFacet= new LinkedHashMap<>();
+        fieldFacet.put("type", "field");
+        fieldFacet.put("field", field);
+        fieldFacet.put("limit", limit);
+        fieldFacetWrapper.put("field", fieldFacet);
+        fieldFacetName.put(FIELD_FACET_NAME, fieldFacetWrapper);
+        queryFacet.put("facet", fieldFacetName);
+        queryFacet.put("q", facetQuery);
+        queryFacetWrapper.put("query", queryFacet);
+        queryFacetName.put(QUERY_FACET_NAME, queryFacetWrapper);
+        wrapper.put("facet", queryFacetName);
         return wrapper;
     }
 
