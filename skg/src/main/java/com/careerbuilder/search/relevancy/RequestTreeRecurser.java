@@ -55,8 +55,7 @@ public class RequestTreeRecurser {
         if(requests != null) {
             setDefaults(requests);
             for (ResponseValue value : parentResponse.values) {
-                TermQuery filter = new TermQuery(new Term(parentResponse.type, value.value.toLowerCase()));
-                NodeContext context = new NodeContext(parentContext, filter);
+                NodeContext context = new NodeContext(parentContext, parentResponse.type+":"+value.value.toLowerCase());
                 normalizer.transform(context, requests, null);
                 ResponseNode [] responses = generator.transform(context, requests, null);
                 value.children = scorer.transform(context, requests, responses);

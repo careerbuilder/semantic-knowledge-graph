@@ -30,8 +30,9 @@ public class NodeNormalizer implements RecursionOp {
     public void normalizeRequests(RequestNode[] requests, FacetFieldAdapter[] adapters, FacetRunner[] runners) {
         int runnerStartIndex = 0;
         for(int i = 0; i < requests.length; ++i) {
+            int length = requests[i].values.length;
             normalizeSingleRequest(requests[i], adapters[i], runners, runnerStartIndex);
-            runnerStartIndex += requests[i].values.length;
+            runnerStartIndex += length;
         }
     }
 
