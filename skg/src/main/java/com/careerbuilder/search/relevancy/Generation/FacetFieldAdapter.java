@@ -15,9 +15,14 @@ public class FacetFieldAdapter {
     public String baseField;
     private String facetFieldExtension;
 
+    @Deprecated
+    public FacetFieldAdapter(String field) {
+        this.field = field;
+        this.baseField = field;
+    }
+
     public FacetFieldAdapter(NodeContext context, String field)
     {
-
         this.context = context;
         this.facetFieldExtension = context.parameterSet.invariants.get(field + ".facet-field", "");
         checkField(field, field);
