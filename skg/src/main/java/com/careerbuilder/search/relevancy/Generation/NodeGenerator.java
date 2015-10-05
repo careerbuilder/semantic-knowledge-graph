@@ -41,7 +41,7 @@ public class NodeGenerator implements RecursionOp {
     private int addPassedInValues(RequestNode request, ResponseNode resp) {
         int k = 0;
         if(request.values != null) {
-            for (; k < resp.values.length; ++k) {
+            for (; k < request.values.length; ++k) {
                 resp.values[k] = new ResponseValue(request.values[k]);
                 resp.values[k].normalizedValue = request.normalizedValues == null ? null : request.normalizedValues.get(k);
             }
