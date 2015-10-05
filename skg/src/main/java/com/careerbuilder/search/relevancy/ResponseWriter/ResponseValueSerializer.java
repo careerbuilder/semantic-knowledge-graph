@@ -20,9 +20,9 @@ public class ResponseValueSerializer implements JsonSerializer<ResponseValue> {
             src.normalizedValue.forEach((elem) -> resp.addProperty(elem.getKey(), elem.getValue()));
         }
         resp.addProperty("relatedness", src.relatedness);
-        resp.addProperty("magnitude", src.magnitude);
         resp.addProperty("popularity", src.popularity);
-
+        resp.addProperty("foreground_popularity", src.foreground_popularity);
+        resp.addProperty("background_popularity", src.background_popularity);
         resp.add("compare", context.serialize(src.compare));
         return resp;
     }
