@@ -17,25 +17,31 @@ public class NodeScorer implements RecursionOp {
 
     public ResponseNode[] transform(NodeContext context, RequestNode[] requests, ResponseNode[] responses) {
         for(int i = 0; i < responses.length; ++i) {
+            QueryRunner[] qRunners = buildQueryRunners(context.req.getSearcher(), context.queryDomain, responses[i]);
             QueryRunner[] fgRunners = buildQueryRunners(context.req.getSearcher(), context.fgDomain, responses[i]);
             QueryRunner[] bgRunners = buildQueryRunners(context.req.getSearcher(), context.bgDomain, responses[i]);
+            ThreadPool.multiplex(qRunners);
             ThreadPool.multiplex(fgRunners);
             ThreadPool.multiplex(bgRunners);
+            ThreadPool.demultiplex(qRunners);
             ThreadPool.demultiplex(fgRunners);
             ThreadPool.demultiplex(bgRunners);
-            buildResponse(responses[i], fgRunners, bgRunners);
+            buildResponse(responses[i], fgRunners, bgRunners, qRunners);
             processResponse(context, responses[i], requests[i]);
         }
         return responses;
     }
 
-    private void buildResponse(ResponseNode response, QueryRunner[] fgRunners, QueryRunner[] bgRunners) {
+    private void buildResponse(ResponseNode response, QueryRunner[] fgRunners, QueryRunner[] bgRunners, QueryRunner [] qRunners) {
         for(int k = 0; k < fgRunners.length; ++k) {
+            if(qRunners[k] != null) {
+                response.values[k].popularity = qRunners[k].result;
+            }
             if(fgRunners[k] != null) {
-                response.values[k].magnitude = fgRunners[k].result;
+                response.values[k].foreground_popularity = fgRunners[k].result;
             }
             if(bgRunners[k] != null) {
-                response.values[k].popularity = bgRunners[k].result;
+                response.values[k].background_popularity= bgRunners[k].result;
             }
         }
     }
@@ -53,7 +59,7 @@ public class NodeScorer implements RecursionOp {
     private void relatednessScore(ResponseNode response, int fgTotal, int bgTotal) {
         for (int k = 0; k < response.values.length; ++k) {
             response.values[k].relatedness = RelatednessStrategy.z(fgTotal,
-                    bgTotal, response.values[k].magnitude, response.values[k].popularity);
+                    bgTotal, response.values[k].foreground_popularity, response.values[k].background_popularity);
         }
     }
 
