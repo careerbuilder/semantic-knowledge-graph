@@ -11,6 +11,7 @@ import org.apache.lucene.search.PhraseQuery;
 import org.apache.solr.search.DocSet;
 import org.apache.solr.search.SolrIndexSearcher;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 public class NodeScorer implements RecursionOp {
@@ -53,6 +54,7 @@ public class NodeScorer implements RecursionOp {
             int bgTotal = context.bgDomain.size();
             relatednessScore(response, fgTotal, bgTotal);
             ResponseUtility.filterAndSortValues(response, request);
+            ScoreNormalizer.normalize(context, response.values);
         }
     }
 
