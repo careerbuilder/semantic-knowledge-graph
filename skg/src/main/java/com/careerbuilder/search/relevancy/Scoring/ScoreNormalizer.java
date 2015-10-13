@@ -33,6 +33,6 @@ public class ScoreNormalizer {
     }
 
     private static double normalizeFunc(int total, double value) {
-        return (value / total) * 1e6;
+        return Math.round((value / total) * 1e6);
     }
 }
