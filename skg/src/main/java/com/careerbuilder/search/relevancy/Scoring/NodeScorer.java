@@ -41,7 +41,7 @@ public class NodeScorer implements RecursionOp {
             {
                 runFallback(context, responses[i], fgRunners, fallbackField);
             }
-            buildResponse(responses[i], fgRunners, bgRunners, qRunners);
+            addQueryResults(responses[i], fgRunners, bgRunners, qRunners);
             processResponse(context, responses[i], requests[i]);
         }
         return responses;
@@ -69,14 +69,14 @@ public class NodeScorer implements RecursionOp {
     {
         HashSet<Integer> indices = new HashSet<>();
         for(int i = 0; i < values.length; ++i) {
-            if(values[i].result < minCount) {
+            if(values[i].result <= minCount) {
                 indices.add(i);
             }
         }
         return indices;
     }
 
-    private void buildResponse(ResponseNode response, QueryRunner[] fgRunners, QueryRunner[] bgRunners, QueryRunner [] qRunners) {
+    private void addQueryResults(ResponseNode response, QueryRunner[] fgRunners, QueryRunner[] bgRunners, QueryRunner [] qRunners) {
         for(int k = 0; k < fgRunners.length; ++k) {
             if(qRunners[k] != null) {
                 response.values[k].popularity = qRunners[k].result;
@@ -116,7 +116,7 @@ public class NodeScorer implements RecursionOp {
         QueryRunner [] runners = new QueryRunner[values.length];
         for(int k = 0; k < values.length; ++k) {
             if(indices == null || indices.contains(k)) {
-                Query query = new TermQuery(new Term(responseType, values[k].value));
+                Query query = new TermQuery(new Term(responseType, values[k].value.toLowerCase().trim()));
                 runners[k] = new QueryRunner(searcher, query, domain);
             }
         }
