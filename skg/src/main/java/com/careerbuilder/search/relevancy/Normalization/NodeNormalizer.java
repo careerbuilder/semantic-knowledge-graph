@@ -16,6 +16,8 @@ import java.util.LinkedList;
 
 public class NodeNormalizer implements RecursionOp {
 
+    // this is the map index whose value should match the passed in value
+    private static final String STRING_VALUE_IDENTIFIER = "name";
     private static final int DEFAULT_NORM_LIMIT = 100;
 
     public ResponseNode [] transform(NodeContext context, RequestNode [] requests, ResponseNode [] responses) throws IOException {
@@ -60,9 +62,9 @@ public class NodeNormalizer implements RecursionOp {
                                   LinkedList<SimpleOrderedMap<String>> normalizedMaps) {
         int j = 0;
         while(j < runner.buckets.size()){
-            String normString = adapter.getStringValue(runner.buckets.get(j));
-            if(normString.toLowerCase().contains(requestValue.toLowerCase())) {
-                normalizedStrings.add(normString);
+            String name = adapter.getMapValue(runner.buckets.get(j)).get(STRING_VALUE_IDENTIFIER);
+            if(name.toLowerCase().equals(requestValue.toLowerCase())) {
+                normalizedStrings.add(adapter.getStringValue(runner.buckets.get(j)));
                 normalizedMaps.add(adapter.getMapValue(runner.buckets.get(j)));
             }
             ++j;
