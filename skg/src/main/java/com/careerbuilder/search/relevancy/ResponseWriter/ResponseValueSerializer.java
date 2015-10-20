@@ -10,11 +10,13 @@ import java.lang.reflect.Type;
 
 public class ResponseValueSerializer implements JsonSerializer<ResponseValue> {
 
+    private final static String DEFAULT_VALUE_FIELD = "name";
+
     public JsonElement serialize(ResponseValue src, Type type, JsonSerializationContext context)
     {
         JsonObject resp = new JsonObject();
         if(src.normalizedValue == null) {
-            resp.addProperty("value", src.value);
+            resp.addProperty(DEFAULT_VALUE_FIELD, src.value);
         }
         else {
             src.normalizedValue.forEach((elem) -> resp.addProperty(elem.getKey(), elem.getValue()));
