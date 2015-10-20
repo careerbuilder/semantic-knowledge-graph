@@ -38,7 +38,9 @@ public class FacetFieldAdapter {
             String[] facetFieldKeys = facetFieldExtension.split(FACET_FIELD_DELIMITER);
             String[] facetFieldValues = value.split("\\"+FACET_FIELD_VALUE_DELIMITER);
             for (int i = 0; i < facetFieldKeys.length && i < facetFieldValues.length; ++i) {
-                result.add(facetFieldKeys[i], facetFieldValues[i]);
+                if(!facetFieldValues.equals("")) {
+                    result.add(facetFieldKeys[i], facetFieldValues[i]);
+                }
             }
         }
         return result;
