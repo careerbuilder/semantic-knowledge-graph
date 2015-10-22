@@ -82,7 +82,7 @@ public class FacetRunner extends Waitable{
     // see above
     public Map<String, Object> buildFacetJson()
     {
-        int limit = 2*Math.max(this.limit, 25);
+        int limit = 5*Math.max(this.limit, 25);
         LinkedHashMap<String, Object> wrapper = new LinkedHashMap<>();
         LinkedHashMap<String, Object> queryFacetName = new LinkedHashMap<>();
         LinkedHashMap<String, Object> queryFacetWrapper= new LinkedHashMap<>();
