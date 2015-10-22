@@ -98,6 +98,7 @@ public class NodeScorer implements RecursionOp {
             relatednessScore(response, fgTotal, bgTotal);
             ScoreNormalizer.normalize(context, response.values);
             ResponseUtility.filterAndSortValues(response, request, context.request.min_count);
+            System.out.println(response.values[0].value);
         }
     }
 
