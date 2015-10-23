@@ -7,7 +7,7 @@ public class RelatednessStrategy {
         double num = fgCount - fgTotal * bgProb;
         double denom = Math.sqrt(fgTotal * bgProb * (1 - bgProb));
         denom = (denom == 0) ? 1e-10 : denom;
-        return sigmoid(num / denom);
+        return Math.round(sigmoid(num / denom) * 1e5) / 1e5;
     }
 
     private static double sigmoid(double x) {
