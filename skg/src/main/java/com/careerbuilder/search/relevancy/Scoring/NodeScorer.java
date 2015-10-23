@@ -48,7 +48,7 @@ public class NodeScorer implements RecursionOp {
     }
 
     private void runFallback(NodeContext context, ResponseNode response, QueryRunner[] fgRunners, String fallbackField) {
-        HashSet<Integer> fallbackIndices = getFallbackIndices(fgRunners, context.request.min_count);
+        HashSet<Integer> fallbackIndices = getFallbackIndices(fgRunners, context.request.min_popularity);
         QueryRunner [] fallbackRunners = buildQueryRunners(context.req.getSearcher(),
                 context.fgDomain, response.values, fallbackField, fallbackIndices);
         ThreadPool.multiplex(fallbackRunners);
@@ -65,11 +65,11 @@ public class NodeScorer implements RecursionOp {
         }
     }
 
-    private HashSet<Integer> getFallbackIndices(QueryRunner [] values, int minCount)
+    private HashSet<Integer> getFallbackIndices(QueryRunner [] values, double minCount)
     {
         HashSet<Integer> indices = new HashSet<>();
         for(int i = 0; i < values.length; ++i) {
-            if(values[i].result <= minCount) {
+            if(values[i].result < minCount || values[i].result == 0) {
                 indices.add(i);
             }
         }
@@ -97,8 +97,7 @@ public class NodeScorer implements RecursionOp {
             int bgTotal = context.bgDomain.size();
             relatednessScore(response, fgTotal, bgTotal);
             ScoreNormalizer.normalize(context, response.values);
-            ResponseUtility.filterAndSortValues(response, request, context.request.min_count);
-            System.out.println(response.values[0].value);
+            ResponseUtility.filterAndSortValues(response, request, context.request.min_popularity);
         }
     }
 
