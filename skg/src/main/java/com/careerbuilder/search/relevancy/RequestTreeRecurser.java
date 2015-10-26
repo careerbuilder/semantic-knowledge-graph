@@ -12,6 +12,8 @@ import java.io.IOException;
 
 public class RequestTreeRecurser {
 
+    public static final int DEFAULT_REQUEST_LIMIT = 1;
+
     private RelatednessRequest request;
     private NodeContext baseContext;
     private RecursionOp normalizer;
@@ -73,7 +75,7 @@ public class RequestTreeRecurser {
             if (request.values == null || request.values.length == 0) {
                 request.discover_values = true;
             }
-            int limit = request.values == null || request.values.length == 0 ? 10 : request.values.length;
+            int limit = request.values == null || request.values.length == 0 ? DEFAULT_REQUEST_LIMIT : request.values.length;
             request.limit = request.limit == 0 ? limit : request.limit;
         }
     }
