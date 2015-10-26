@@ -39,7 +39,7 @@ public class NodeScorer implements RecursionOp {
             String fallbackField = context.parameterSet.invariants.get(responses[i].type + ".fallback");
             if(fallbackField != null)
             {
-                runFallback(context, responses[i], fgRunners, fallbackField);
+                runFallback(context, responses[i], fgRunners, bgRunners, qRunners, fallbackField);
             }
             addQueryResults(responses[i], fgRunners, bgRunners, qRunners);
             processResponse(context, responses[i], requests[i]);
@@ -47,13 +47,28 @@ public class NodeScorer implements RecursionOp {
         return responses;
     }
 
-    private void runFallback(NodeContext context, ResponseNode response, QueryRunner[] fgRunners, String fallbackField) {
+    private void runFallback(NodeContext context,
+                             ResponseNode response,
+                             QueryRunner[] fgRunners,
+                             QueryRunner[] bgRunners,
+                             QueryRunner[] qRunners,
+                             String fallbackField) {
         HashSet<Integer> fallbackIndices = getFallbackIndices(fgRunners, context.request.min_popularity);
-        QueryRunner [] fallbackRunners = buildQueryRunners(context.req.getSearcher(),
+        QueryRunner [] fallbackFGRunners = buildQueryRunners(context.req.getSearcher(),
                 context.fgDomain, response.values, fallbackField, fallbackIndices);
-        ThreadPool.multiplex(fallbackRunners);
-        ThreadPool.demultiplex(fallbackRunners);
-        replaceRunners(fgRunners, fallbackRunners, fallbackIndices);
+        QueryRunner [] fallbackBGRunners = buildQueryRunners(context.req.getSearcher(),
+                context.bgDomain, response.values, fallbackField, fallbackIndices);
+        QueryRunner [] fallbackQRunners = buildQueryRunners(context.req.getSearcher(),
+                context.queryDomain, response.values, fallbackField, fallbackIndices);
+        ThreadPool.multiplex(fallbackQRunners);
+        ThreadPool.multiplex(fallbackFGRunners);
+        ThreadPool.multiplex(fallbackBGRunners);
+        ThreadPool.demultiplex(fallbackQRunners);
+        ThreadPool.demultiplex(fallbackFGRunners);
+        ThreadPool.demultiplex(fallbackBGRunners);
+        replaceRunners(qRunners, fallbackQRunners, fallbackIndices);
+        replaceRunners(fgRunners, fallbackFGRunners, fallbackIndices);
+        replaceRunners(bgRunners, fallbackBGRunners, fallbackIndices);
     }
 
     private void replaceRunners(QueryRunner [] target, QueryRunner [] source, HashSet<Integer> targetPositions) {
