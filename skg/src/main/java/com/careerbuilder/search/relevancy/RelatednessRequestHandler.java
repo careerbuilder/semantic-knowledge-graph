@@ -32,6 +32,7 @@ public class RelatednessRequestHandler extends RequestHandlerBase
         RelatednessRequest request = parsePost(solrReq);
         ParameterSet parameterSet = new ParameterSet(solrReq.getParams(), defaults, invariants);
         NodeContext context = new NodeContext(request, solrReq, parameterSet);
+        new RequestValidator(context, request).validate();
         RequestTreeRecurser recurser = new RequestTreeRecurser(context);
         solrRsp.add("relatednessResponse", recurser.score());
     }
