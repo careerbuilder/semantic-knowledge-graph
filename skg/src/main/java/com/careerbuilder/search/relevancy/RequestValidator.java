@@ -32,7 +32,7 @@ public class RequestValidator {
         if(requestNode.type == null || requestNode.type.equals("")) {
             throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, "A request node contains empty or null type.");
         }
-        FacetFieldAdapter.checkField(context, requestNode.type, requestNode.type);
+        FieldChecker.checkField(context, requestNode.type, requestNode.type);
 
         if(requestNode.compare != null) {
             for (int i = 0; i < requestNode.compare.length; ++i){
