@@ -25,7 +25,7 @@ public class FacetFieldAdapter {
     {
         this.context = context;
         this.facetFieldExtension = context.parameterSet.invariants.get(field + ".facet-field", "");
-        checkField(field, field);
+        checkField(context, field, field);
         this.baseField = field;
         this.field = buildField(field);
     }
@@ -54,7 +54,7 @@ public class FacetFieldAdapter {
 
     private String buildField(String field) {
         String facetField = extendField(field, facetFieldExtension);
-        checkField(field, facetField);
+        checkField(context, field, facetField);
         return facetField;
     }
 
@@ -73,14 +73,14 @@ public class FacetFieldAdapter {
         return facetFieldExtension != null && !facetFieldExtension.equals("");
     }
 
-    private void checkField(String inputField, String facetField) {
+    public static void checkField(NodeContext context, String inputField, String facetField) {
         try {
             context.req.getCore()
                     .getLatestSchema()
                     .getField(facetField).getName();
         } catch (SolrException e) {
             throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
-                    "Values of type \"" + inputField + "\" cannot be generated automatically or normalized" +
+                    "Values of type \"" + inputField + "\" cannot be generated automatically or normalized " +
                     "(adapted as \"" + facetField + "\")");
         }
     }
