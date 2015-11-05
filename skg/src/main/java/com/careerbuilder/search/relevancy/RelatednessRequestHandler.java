@@ -31,9 +31,9 @@ public class RelatednessRequestHandler extends RequestHandlerBase
     public void handleRequestBody(SolrQueryRequest solrReq, SolrQueryResponse solrRsp)
             throws Exception {
         RelatednessRequest request = parsePost(solrReq);
+        new RequestValidator(solrReq, request).validate();
         ParameterSet parameterSet = new ParameterSet(solrReq.getParams(), defaults, invariants);
         NodeContext context = new NodeContext(request, solrReq, parameterSet);
-        new RequestValidator(context, request).validate();
         RequestTreeRecurser recurser = new RequestTreeRecurser(context);
         RelatednessResponse response = new RelatednessResponse();
         response.data = recurser.score();
@@ -67,6 +67,9 @@ public class RelatednessRequestHandler extends RequestHandlerBase
         String inputString;
         inputString = CharStreams.toString(inputReader);
         inputReader.close();
+        if(inputString.equals("") || inputString == null) {
+           throwWithClassName(" requires POST data");
+        }
         return inputString;
     }
 

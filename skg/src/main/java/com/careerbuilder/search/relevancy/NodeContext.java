@@ -2,6 +2,7 @@ package com.careerbuilder.search.relevancy;
 
 import com.careerbuilder.search.relevancy.Models.ParameterSet;
 import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
+import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.request.SolrQueryRequest;
@@ -78,7 +79,9 @@ public class NodeContext {
             }
             return queryList;
         }
-        return null;
+        List<Query> deflt = new LinkedList<>();
+        deflt.add(new MatchAllDocsQuery());
+        return deflt;
     }
 
     private Query parseQueryString(String qString) {

@@ -26,7 +26,7 @@ public class FacetFieldAdapter {
     {
         this.context = context;
         this.facetFieldExtension = context.parameterSet.invariants.get(field + ".facet-field", "");
-        FieldChecker.checkField(context, field, field);
+        FieldChecker.checkField(context.req, field, field);
         this.baseField = field;
         this.field = buildField(field);
     }
@@ -55,7 +55,7 @@ public class FacetFieldAdapter {
 
     private String buildField(String field) {
         String facetField = extendField(field, facetFieldExtension);
-        FieldChecker.checkField(context, field, facetField);
+        FieldChecker.checkField(context.req, field, facetField);
         return facetField;
     }
 
