@@ -5,16 +5,17 @@ import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
 import com.careerbuilder.search.relevancy.Models.RequestNode;
 import com.careerbuilder.search.relevancy.ResponseWriter.RelatednessResponseWriter;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.request.SolrQueryRequest;
 
 public class RequestValidator {
 
     private RelatednessRequest request;
-    private NodeContext context;
+    private SolrQueryRequest solrRequest;
 
-    public RequestValidator(NodeContext context, RelatednessRequest request)
+    public RequestValidator(SolrQueryRequest solrRequest, RelatednessRequest request)
     {
         this.request = request;
-        this.context = context;
+        this.solrRequest= solrRequest;
     }
 
     public void validate()
@@ -35,7 +36,7 @@ public class RequestValidator {
         if(requestNode.type == null || requestNode.type.equals("")) {
             throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, "A request node contains empty or null type.");
         }
-        FieldChecker.checkField(context, requestNode.type, requestNode.type);
+        FieldChecker.checkField(solrRequest, requestNode.type, requestNode.type);
 
         if(requestNode.compare != null) {
             for (int i = 0; i < requestNode.compare.length; ++i){

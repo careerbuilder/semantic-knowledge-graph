@@ -1,12 +1,13 @@
 package com.careerbuilder.search.relevancy;
 
 import org.apache.solr.common.SolrException;
+import org.apache.solr.request.SolrQueryRequest;
 
 public class FieldChecker {
 
-    public static void checkField(NodeContext context, String inputField, String facetField) {
+    public static void checkField(SolrQueryRequest req, String inputField, String facetField) {
         try {
-            context.req.getCore()
+            req.getCore()
                     .getLatestSchema()
                     .getField(facetField).getName();
         } catch (SolrException e) {
