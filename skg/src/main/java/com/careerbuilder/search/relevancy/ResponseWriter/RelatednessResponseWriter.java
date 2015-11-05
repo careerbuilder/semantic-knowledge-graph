@@ -30,6 +30,9 @@ public class RelatednessResponseWriter implements QueryResponseWriter{
         int status = (int)response.getResponseHeader().get("status");
         RelatednessResponse model = (RelatednessResponse)response.getValues().get("relatednessResponse");
         if(e != null) {
+            if(model == null) {
+                model = new RelatednessResponse();
+            }
             model.error = new Error(e.getMessage(), status);
         }
         writer.write(gson.toJson(model, RelatednessResponse.class));
