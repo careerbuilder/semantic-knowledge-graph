@@ -1,6 +1,7 @@
 package com.careerbuilder.search.relevancy.ResponseWriter;
 
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
+import com.careerbuilder.search.relevancy.Models.*;
+import com.careerbuilder.search.relevancy.Models.Error;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.solr.common.util.NamedList;
@@ -27,47 +28,11 @@ public class RelatednessResponseWriter implements QueryResponseWriter{
         Gson gson = new GsonBuilder().registerTypeAdapter(ResponseValue.class, new ResponseValueSerializer()).create();
         Exception e = response.getException();
         int status = (int)response.getResponseHeader().get("status");
-        if(e == null) {
-            writer.write(gson.toJson(response.getValues().get("relatednessResponse")));
+        RelatednessResponse model = (RelatednessResponse)response.getValues().get("relatednessResponse");
+        if(e != null) {
+            model.error = new Error(e.getMessage(), status);
         }
-        else {
-            ErrorResponse error = new ErrorResponse(new ResponseHeader(status), new Error(e.getMessage(),status));
-            writer.write(gson.toJson(error));
-        }
+        writer.write(gson.toJson(model, RelatednessResponse.class));
     }
 
-    public class Error
-    {
-        public String msg;
-        public int code;
-
-        public Error(String msg, int code)
-        {
-            this.msg = msg;
-            this.code = code;
-        }
-    }
-
-    public class ResponseHeader
-    {
-        public int status;
-
-        public ResponseHeader(int status)
-        {
-            this.status = status;
-        }
-    }
-
-    public class ErrorResponse
-    {
-        public ResponseHeader responseHeader;
-        public Error error;
-
-        public ErrorResponse(ResponseHeader header, Error error)
-        {
-            this.responseHeader = header;
-            this.error = error;
-        }
-
-    }
 }
