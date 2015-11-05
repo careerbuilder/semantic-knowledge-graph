@@ -19,6 +19,9 @@ public class RequestValidator {
 
     public void validate()
     {
+        if(request.queries == null) {
+            throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, "No queries supplied for generation / scoring");
+        }
         if(request.compare == null || request.compare.length == 0) {
             throw new SolrException(SolrException.ErrorCode.BAD_REQUEST, "Request contains no compare node or an empty compare node");
         }

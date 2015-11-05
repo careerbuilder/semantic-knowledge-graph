@@ -2,6 +2,7 @@ package com.careerbuilder.search.relevancy;
 
 import com.careerbuilder.search.relevancy.Models.ParameterSet;
 import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
+import com.careerbuilder.search.relevancy.Models.RelatednessResponse;
 import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
 import org.apache.lucene.analysis.util.ResourceLoader;
@@ -34,7 +35,9 @@ public class RelatednessRequestHandler extends RequestHandlerBase
         NodeContext context = new NodeContext(request, solrReq, parameterSet);
         new RequestValidator(context, request).validate();
         RequestTreeRecurser recurser = new RequestTreeRecurser(context);
-        solrRsp.add("relatednessResponse", recurser.score());
+        RelatednessResponse response = new RelatednessResponse();
+        response.data = recurser.score();
+        solrRsp.add("relatednessResponse", response);
     }
 
     private RelatednessRequest parsePost(SolrQueryRequest request) throws IOException {
