@@ -7,11 +7,17 @@ public class RelatednessStrategy {
         double num = fgCount - fgTotal * bgProb;
         double denom = Math.sqrt(fgTotal * bgProb * (1 - bgProb));
         denom = (denom == 0) ? 1e-10 : denom;
-        return Math.round(sigmoid(num / denom) * 1e5) / 1e5;
+        double z = num / denom;
+        double result = 0.2*sigmoid(z, -300)
+                + 0.2*sigmoid(z, -50)
+                + 0.2*sigmoid(z, 0)
+                + 0.2*sigmoid(z, 50)
+                + 0.2*sigmoid(z, 300);
+        return Math.round(result * 1e5) / 1e5;
     }
 
-    private static double sigmoid(double x) {
-        return x / (10 + Math.abs(x));
+    private static double sigmoid(double x, double offset) {
+        return (x+offset) / (30 + Math.abs(x+offset));
     }
 }
 
