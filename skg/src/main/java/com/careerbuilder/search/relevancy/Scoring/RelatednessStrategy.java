@@ -8,11 +8,11 @@ public class RelatednessStrategy {
         double denom = Math.sqrt(fgTotal * bgProb * (1 - bgProb));
         denom = (denom == 0) ? 1e-10 : denom;
         double z = num / denom;
-        double result = 0.2*sigmoid(z, -200, 50)
+        double result = 0.2*sigmoid(z, -150, 50)
                 + 0.2*sigmoid(z, -50, 30)
                 + 0.2*sigmoid(z, 0, 30)
                 + 0.2*sigmoid(z, 50, 30)
-                + 0.2*sigmoid(z, 200, 50);
+                + 0.2*sigmoid(z, 150, 50);
         return Math.round(result * 1e5) / 1e5;
     }
 
