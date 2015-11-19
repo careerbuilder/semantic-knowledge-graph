@@ -86,7 +86,7 @@ public class NodeContext {
 
     private Query parseQueryString(String qString) {
         try {
-            QParser parser = QParser.getParser(qString, null, req);
+            QParser parser = QParser.getParser(qString, req.getParams().get("defType"), req);
             return parser.getQuery();
         } catch (SyntaxError e) {
             throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
