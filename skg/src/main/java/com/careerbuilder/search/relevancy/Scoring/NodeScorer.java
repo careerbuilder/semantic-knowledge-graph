@@ -2,17 +2,11 @@ package com.careerbuilder.search.relevancy.Scoring;
 
 import com.careerbuilder.search.relevancy.Models.RequestNode;
 import com.careerbuilder.search.relevancy.Models.ResponseNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.careerbuilder.search.relevancy.NodeContext;
 import com.careerbuilder.search.relevancy.RecursionOp;
 import com.careerbuilder.search.relevancy.Runnable.QueryRunner;
 import com.careerbuilder.search.relevancy.ThreadPool.ThreadPool;
 import com.careerbuilder.search.relevancy.utility.ResponseUtility;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
-import org.apache.solr.search.DocSet;
-import org.apache.solr.search.SolrIndexSearcher;
 
 import java.util.HashSet;
 
@@ -20,12 +14,11 @@ public class NodeScorer implements RecursionOp {
 
     public ResponseNode[] transform(NodeContext context, RequestNode[] requests, ResponseNode[] responses) {
         for(int i = 0; i < responses.length; ++i) {
-            QueryRunner[] qRunners =
-                    buildQueryRunners(context.req.getSearcher(), context.queryDomain, responses[i].values, responses[i].type, null);
-            QueryRunner[] fgRunners =
-                    buildQueryRunners(context.req.getSearcher(), context.fgDomain, responses[i].values, responses[i].type, null);
-            QueryRunner[] bgRunners =
-                    buildQueryRunners(context.req.getSearcher(), context.bgDomain, responses[i].values, responses[i].type, null);
+            QueryRunnerFactory factory = new QueryRunnerFactory(context, responses[i], null);
+            QueryRunner[] qRunners = context.request.return_popularity
+                    ? factory.getQueryRunners(context.queryDomain, responses[i].type) : new QueryRunner[0];
+            QueryRunner[] fgRunners = factory.getQueryRunners(context.fgDomain,responses[i].type);
+            QueryRunner[] bgRunners = factory.getQueryRunners(context.bgDomain,responses[i].type);
             ThreadPool.multiplex(qRunners);
             ThreadPool.multiplex(fgRunners);
             ThreadPool.multiplex(bgRunners);
@@ -50,12 +43,11 @@ public class NodeScorer implements RecursionOp {
                              QueryRunner[] qRunners,
                              String fallbackField) {
         HashSet<Integer> fallbackIndices = getFallbackIndices(fgRunners, context.request.min_popularity);
-        QueryRunner [] fallbackFGRunners = buildQueryRunners(context.req.getSearcher(),
-                context.fgDomain, response.values, fallbackField, fallbackIndices);
-        QueryRunner [] fallbackBGRunners = buildQueryRunners(context.req.getSearcher(),
-                context.bgDomain, response.values, fallbackField, fallbackIndices);
-        QueryRunner [] fallbackQRunners = buildQueryRunners(context.req.getSearcher(),
-                context.queryDomain, response.values, fallbackField, fallbackIndices);
+        QueryRunnerFactory factory = new QueryRunnerFactory(context, response, fallbackIndices);
+        QueryRunner[] fallbackQRunners = context.request.return_popularity
+                ? factory.getQueryRunners(context.queryDomain, fallbackField) : new QueryRunner[0];
+        QueryRunner[] fallbackFGRunners = factory.getQueryRunners(context.fgDomain, fallbackField);
+        QueryRunner[] fallbackBGRunners = factory.getQueryRunners(context.bgDomain, fallbackField);
         ThreadPool.multiplex(fallbackQRunners);
         ThreadPool.multiplex(fallbackFGRunners);
         ThreadPool.multiplex(fallbackBGRunners);
@@ -88,14 +80,24 @@ public class NodeScorer implements RecursionOp {
     }
 
     private void addQueryResults(ResponseNode response, QueryRunner[] fgRunners, QueryRunner[] bgRunners, QueryRunner [] qRunners) {
-        for(int k = 0; k < fgRunners.length; ++k) {
-            if(qRunners[k] != null) {
+        for(int k = 0; k < qRunners.length; ++k)
+        {
+            if (qRunners[k] != null)
+            {
                 response.values[k].popularity = qRunners[k].result;
             }
-            if(fgRunners[k] != null) {
+        }
+        for(int k = 0; k < fgRunners.length; ++k)
+        {
+            if (fgRunners[k] != null)
+            {
                 response.values[k].foreground_popularity = fgRunners[k].result;
             }
-            if(bgRunners[k] != null) {
+        }
+        for(int k = 0; k < bgRunners.length; ++k)
+        {
+            if(bgRunners[k] != null)
+            {
                 response.values[k].background_popularity= bgRunners[k].result;
             }
         }
@@ -117,20 +119,5 @@ public class NodeScorer implements RecursionOp {
             response.values[k].relatedness = RelatednessStrategy.z(fgTotal,
                     bgTotal, response.values[k].foreground_popularity, response.values[k].background_popularity);
         }
-    }
-
-    private QueryRunner[] buildQueryRunners(SolrIndexSearcher searcher,
-                                            DocSet domain,
-                                            ResponseValue[] values,
-                                            String responseType,
-                                            HashSet<Integer> indices) {
-        QueryRunner [] runners = new QueryRunner[values.length];
-        for(int k = 0; k < values.length; ++k) {
-            if(indices == null || indices.contains(k)) {
-                Query query = new TermQuery(new Term(responseType, values[k].value.toLowerCase().trim()));
-                runners[k] = new QueryRunner(searcher, query, domain);
-            }
-        }
-        return runners;
     }
 }
