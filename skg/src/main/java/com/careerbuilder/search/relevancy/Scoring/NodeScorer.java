@@ -7,18 +7,14 @@ import com.careerbuilder.search.relevancy.NodeContext;
 import com.careerbuilder.search.relevancy.RecursionOp;
 import com.careerbuilder.search.relevancy.Runnable.QueryRunner;
 import com.careerbuilder.search.relevancy.ThreadPool.ThreadPool;
+import com.careerbuilder.search.relevancy.utility.ResponseUtility;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.solr.search.DocSet;
 import org.apache.solr.search.SolrIndexSearcher;
 
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 
 public class NodeScorer implements RecursionOp {
 
