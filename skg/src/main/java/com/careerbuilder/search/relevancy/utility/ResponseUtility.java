@@ -55,7 +55,7 @@ public class ResponseUtility {
         List<ResponseValue> disposableList = new LinkedList<>();
         for (ResponseValue r : results)
         {
-            if (expandedContains(keepSet, r))
+            if (keepSet.stream().anyMatch(s -> r.valuesEqual(new ResponseValue(s))))
                 keepList.add(r);
             else
                 disposableList.add(r);
@@ -63,8 +63,8 @@ public class ResponseUtility {
 
         if (keepList.size() < limit)
         {
-            int moreResultsToAdd = Math.min(limit - keepList.size(), disposableList.size());
-            keepList.addAll(disposableList.subList(0, moreResultsToAdd));
+            int numResultsToAdd = Math.min(limit - keepList.size(), disposableList.size());
+            keepList.addAll(disposableList.subList(0, numResultsToAdd));
         }
         SortUtility.sortResponseValues(keepList, sort);
         return keepList;

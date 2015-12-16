@@ -3,7 +3,6 @@ package com.careerbuilder.search.relevancy.utility;
 import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.careerbuilder.search.relevancy.Models.SortType;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
