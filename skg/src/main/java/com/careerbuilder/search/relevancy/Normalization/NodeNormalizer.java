@@ -7,6 +7,7 @@ import com.careerbuilder.search.relevancy.NodeContext;
 import com.careerbuilder.search.relevancy.RecursionOp;
 import com.careerbuilder.search.relevancy.Runnable.FacetRunner;
 import com.careerbuilder.search.relevancy.ThreadPool.ThreadPool;
+import com.careerbuilder.search.relevancy.utility.MapUtility;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Sort;
 import org.apache.solr.common.util.SimpleOrderedMap;
@@ -45,31 +46,28 @@ public class NodeNormalizer implements RecursionOp {
             LinkedList<SimpleOrderedMap<String>> normalizedMaps= new LinkedList<>();
             for(int k = 0; k < request.values.length; ++k)
             {
-                if(!populateNorms(adapter, runners[k + requestStartIndex], request.values[k], normalizedStrings, normalizedMaps)) {
-                    normalizedStrings.add(request.values[k]);
-                    normalizedMaps.add(null);
-                }
+                populateNorms(adapter, runners[k + requestStartIndex], request.values[k], normalizedStrings, normalizedMaps);
             }
             request.normalizedValues = normalizedMaps;
             request.values = normalizedStrings.toArray(new String[normalizedStrings.size()]);
         }
     }
 
-    private boolean populateNorms(FacetFieldAdapter adapter,
+    private void populateNorms(FacetFieldAdapter adapter,
                                   FacetRunner runner,
                                   String requestValue,
                                   LinkedList<String> normalizedStrings,
                                   LinkedList<SimpleOrderedMap<String>> normalizedMaps) {
-        int j = 0;
-        while(j < runner.buckets.size()){
-            String name = adapter.getMapValue(runner.buckets.get(j)).get(STRING_VALUE_IDENTIFIER);
-            if(name.toLowerCase().equals(requestValue.toLowerCase())) {
+        for(int j = 0; j < runner.buckets.size(); ++j){
+            SimpleOrderedMap<String> facetResult = adapter.getMapValue(runner.buckets.get(j));
+            if(MapUtility.mapContainsValue(requestValue.toLowerCase(), facetResult)) {
                 normalizedStrings.add(adapter.getStringValue(runner.buckets.get(j)));
                 normalizedMaps.add(adapter.getMapValue(runner.buckets.get(j)));
+                return;
             }
-            ++j;
         }
-        return j != 0;
+        normalizedStrings.add(requestValue);
+        normalizedMaps.add(null);
     }
 
     private FacetRunner [] buildRunners(NodeContext context, RequestNode [] requests, FacetFieldAdapter [] adapters) throws IOException

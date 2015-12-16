@@ -55,7 +55,7 @@ public class RequestTreeRecurser {
         if(requests != null) {
             setDefaults(requests);
             for (ResponseValue value : parentResponse.values) {
-                String query = value.value == null || value.value == "" ? "*" : value.value.toLowerCase();
+                String query = value.value == null || value.value.equals("") ? "*" : value.value.toLowerCase();
                 NodeContext context = new NodeContext(parentContext, parentResponse.type+":"+query);
                 if(context.request.normalize) {
                     normalizer.transform(context, requests, null);
