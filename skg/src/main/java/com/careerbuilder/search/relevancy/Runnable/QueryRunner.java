@@ -6,7 +6,7 @@ import org.apache.solr.search.SolrIndexSearcher;
 
 public class QueryRunner extends Waitable {
 
-    Query query;
+    protected Query query;
     SolrIndexSearcher searcher;
     DocSet filter;
     Exception e;
