@@ -19,7 +19,7 @@ public class ThreadPool
     public ThreadPool()
     {
         queue = new LinkedList<>();
-        int nThreads = Math.min(Runtime.getRuntime().availableProcessors(), 1);
+        int nThreads = 1;//Math.min(Runtime.getRuntime().availableProcessors(), 1);
         threads = new PoolWorker[nThreads];
 
         for (int i=0; i<nThreads; i++) {
