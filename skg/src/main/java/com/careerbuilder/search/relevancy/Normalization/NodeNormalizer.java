@@ -7,6 +7,7 @@ import com.careerbuilder.search.relevancy.NodeContext;
 import com.careerbuilder.search.relevancy.RecursionOp;
 import com.careerbuilder.search.relevancy.Runnable.FacetRunner;
 import com.careerbuilder.search.relevancy.ThreadPool.ThreadPool;
+import com.careerbuilder.search.relevancy.utility.MapUtility;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Sort;
 import org.apache.solr.common.util.SimpleOrderedMap;
@@ -60,16 +61,15 @@ public class NodeNormalizer implements RecursionOp {
                                   String requestValue,
                                   LinkedList<String> normalizedStrings,
                                   LinkedList<SimpleOrderedMap<String>> normalizedMaps) {
-        int j = 0;
-        while(j < runner.buckets.size()){
-            String name = adapter.getMapValue(runner.buckets.get(j)).get(STRING_VALUE_IDENTIFIER);
-            if(name.toLowerCase().equals(requestValue.toLowerCase())) {
+        for(int j = 0; j < runner.buckets.size(); ++j){
+            SimpleOrderedMap<String> facetResult = adapter.getMapValue(runner.buckets.get(j));
+            if(MapUtility.mapContainsValue(requestValue.toLowerCase(), facetResult)) {
                 normalizedStrings.add(adapter.getStringValue(runner.buckets.get(j)));
                 normalizedMaps.add(adapter.getMapValue(runner.buckets.get(j)));
+                return true;
             }
-            ++j;
         }
-        return j != 0;
+        return false;
     }
 
     private FacetRunner [] buildRunners(NodeContext context, RequestNode [] requests, FacetFieldAdapter [] adapters) throws IOException
