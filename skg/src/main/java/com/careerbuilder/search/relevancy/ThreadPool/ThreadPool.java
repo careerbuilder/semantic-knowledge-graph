@@ -9,17 +9,17 @@ public class ThreadPool
 {
     private final PoolWorker[] threads;
     private final LinkedList<Waitable> queue;
-    private static ThreadPool instance;
+    private static ThreadLocal<ThreadPool> instance = new ThreadLocal<ThreadPool>() {
+        @Override protected ThreadPool initialValue() { return new ThreadPool(); }};
 
-    public static synchronized ThreadPool getInstance() {
-        instance = instance == null ? new ThreadPool() : instance;
-        return instance;
+    public static ThreadPool getInstance() {
+        return instance.get();
     }
 
     public ThreadPool()
     {
         queue = new LinkedList<>();
-        int nThreads = 50;//Math.min(Runtime.getRuntime().availableProcessors(), 1);
+        int nThreads =40;
         threads = new PoolWorker[nThreads];
 
         for (int i=0; i<nThreads; i++) {
