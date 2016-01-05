@@ -1,9 +1,6 @@
 package com.careerbuilder.search.relevancy.utility;
 
-import com.careerbuilder.search.relevancy.Models.RequestNode;
-import com.careerbuilder.search.relevancy.Models.ResponseNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
-import com.careerbuilder.search.relevancy.Models.SortType;
+import com.careerbuilder.search.relevancy.Models.*;
 import com.careerbuilder.search.relevancy.utility.SortUtility;
 
 import java.util.*;
@@ -13,24 +10,25 @@ public class ResponseUtility {
 
     // keeps all passed in values, up to request.limit
     // keeps as many generated values as possible up to request.limit
-    public static void filterAndSortValues(ResponseNode response, RequestNode request, double minPopularity) {
-        int limit = Math.min(response.values.length, request.limit);
+    public static void filterAndSortValues(ResponseNode response, RequestNode node, RelatednessRequest request) {
+        int limit = Math.min(response.values.length, node.limit);
         List<ResponseValue> responseValues = new ArrayList<>(Arrays.asList(response.values));
-        SortUtility.sortResponseValues(responseValues, request.sort);
-        responseValues = thresholdMinCount(responseValues, minPopularity);
+        SortUtility.sortResponseValues(responseValues, node.sort);
+        responseValues = thresholdMinCount(responseValues, request);
         distinct(responseValues);
-        if(request.discover_values && responseValues.size() > 0) {
-            limit = Math.min(responseValues.size(), request.limit);
-            responseValues = filterMergeResults(responseValues, request.values, limit, request.sort);
+        if(node.discover_values && responseValues.size() > 0) {
+            limit = Math.min(responseValues.size(), node.limit);
+            responseValues = filterMergeResults(responseValues, node.values, limit, node.sort);
         }
         ResponseValue[] shrunk = responseValues.toArray(new ResponseValue[responseValues.size()]);
         response.values = shrunk;
     }
 
-    public static List<ResponseValue> thresholdMinCount(List<ResponseValue> values, double minPopularity) {
-        values = values.stream().filter((ResponseValue r) -> r.popularity >= minPopularity
-                && r.background_popularity >= minPopularity
-                && r.foreground_popularity >= minPopularity).collect(Collectors.toList());
+    public static List<ResponseValue> thresholdMinCount(List<ResponseValue> values, RelatednessRequest request) {
+        values = values.stream().filter((ResponseValue r) ->
+                (r.popularity >= request.min_popularity || !request.return_popularity)
+                && r.background_popularity >= request.min_popularity
+                && r.foreground_popularity >= request.min_popularity).collect(Collectors.toList());
         return values;
     }
 
