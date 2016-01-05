@@ -14,7 +14,7 @@ public class ResponseUtility {
         int limit = Math.min(response.values.length, node.limit);
         List<ResponseValue> responseValues = new ArrayList<>(Arrays.asList(response.values));
         SortUtility.sortResponseValues(responseValues, node.sort);
-        responseValues = thresholdMinCount(responseValues, request);
+        responseValues = thresholdMinPopularity(responseValues, request);
         distinct(responseValues);
         if(node.discover_values && responseValues.size() > 0) {
             limit = Math.min(responseValues.size(), node.limit);
@@ -24,7 +24,7 @@ public class ResponseUtility {
         response.values = shrunk;
     }
 
-    public static List<ResponseValue> thresholdMinCount(List<ResponseValue> values, RelatednessRequest request) {
+    public static List<ResponseValue> thresholdMinPopularity(List<ResponseValue> values, RelatednessRequest request) {
         values = values.stream().filter((ResponseValue r) ->
                 (r.popularity >= request.min_popularity || !request.return_popularity)
                 && r.background_popularity >= request.min_popularity
@@ -66,16 +66,5 @@ public class ResponseUtility {
         }
         SortUtility.sortResponseValues(keepList, sort);
         return keepList;
-    }
-
-    protected static boolean expandedContains(List<String> strings, ResponseValue responseValue)
-    {
-        for(String str: strings)
-        {
-            ResponseValue listValue = new ResponseValue(str);
-            if(responseValue.valuesEqual(listValue))
-                return true;
-        }
-        return false;
     }
 }
