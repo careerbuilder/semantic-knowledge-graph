@@ -1,9 +1,6 @@
 package com.careerbuilder.search.relevancy.utility;
 
-import com.careerbuilder.search.relevancy.Models.RequestNode;
-import com.careerbuilder.search.relevancy.Models.ResponseNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
-import com.careerbuilder.search.relevancy.Models.SortType;
+import com.careerbuilder.search.relevancy.Models.*;
 import com.careerbuilder.search.relevancy.utility.SortUtility;
 
 import java.util.*;
@@ -13,25 +10,38 @@ public class ResponseUtility {
 
     // keeps all passed in values, up to request.limit
     // keeps as many generated values as possible up to request.limit
-    public static void filterAndSortValues(ResponseNode response, RequestNode request, double minPopularity) {
-        int limit = Math.min(response.values.length, request.limit);
-        List<ResponseValue> responseValues = new ArrayList<>(Arrays.asList(response.values));
-        SortUtility.sortResponseValues(responseValues, request.sort);
-        responseValues = thresholdMinCount(responseValues, minPopularity);
-        distinct(responseValues);
-        if(request.discover_values && responseValues.size() > 0) {
-            limit = Math.min(responseValues.size(), request.limit);
-            responseValues = filterMergeResults(responseValues, request.values, limit, request.sort);
+    public static ResponseValue[] filterAndSortValues(ResponseValue [] responses, RequestNode node, RelatednessRequest request) {
+        int limit = Math.min(responses.length, node.limit);
+        List<ResponseValue> responseValues = new ArrayList<>(Arrays.asList(responses));
+        SortUtility.sortResponseValues(responseValues, node.sort);
+
+        if (request.return_popularity)
+        {
+            responseValues = thresholdMinPop(responseValues, request.min_popularity);
         }
-        ResponseValue[] shrunk = responseValues.toArray(new ResponseValue[responseValues.size()]);
-        response.values = shrunk;
+        else
+        {
+            responseValues = thresholdMinFGBGPop(responseValues, request.min_popularity);
+        }
+
+        distinct(responseValues);
+        if(node.discover_values && responseValues.size() > 0) {
+            limit = Math.min(responseValues.size(), node.limit);
+            responseValues = filterMergeResults(responseValues, node.values, limit, node.sort);
+        }
+        return responseValues.toArray(new ResponseValue[responseValues.size()]);
     }
 
-    public static List<ResponseValue> thresholdMinCount(List<ResponseValue> values, double minPopularity) {
-        values = values.stream().filter((ResponseValue r) -> r.popularity >= minPopularity
-                && r.background_popularity >= minPopularity
-                && r.foreground_popularity >= minPopularity).collect(Collectors.toList());
-        return values;
+    protected static List<ResponseValue> thresholdMinPop(List<ResponseValue> values, double threshold)
+    {
+        values = values.stream().filter((ResponseValue r) ->
+                (r.popularity >= threshold)).collect(Collectors.toList());
+        return thresholdMinFGBGPop(values, threshold);
+    }
+
+    protected static List<ResponseValue> thresholdMinFGBGPop(List<ResponseValue> values, double threshold) {
+        return values.stream().filter((ResponseValue r) -> (r.background_popularity >= threshold
+                        && r.foreground_popularity >= threshold)).collect(Collectors.toList());
     }
 
     public static void distinct(List<ResponseValue> responseValues)
@@ -68,16 +78,5 @@ public class ResponseUtility {
         }
         SortUtility.sortResponseValues(keepList, sort);
         return keepList;
-    }
-
-    protected static boolean expandedContains(List<String> strings, ResponseValue responseValue)
-    {
-        for(String str: strings)
-        {
-            ResponseValue listValue = new ResponseValue(str);
-            if(responseValue.valuesEqual(listValue))
-                return true;
-        }
-        return false;
     }
 }
