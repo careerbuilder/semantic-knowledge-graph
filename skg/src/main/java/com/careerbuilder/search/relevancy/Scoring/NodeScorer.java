@@ -110,7 +110,7 @@ public class NodeScorer implements RecursionOp {
             int bgTotal = context.bgDomain.size();
             relatednessScore(response, fgTotal, bgTotal);
             ScoreNormalizer.normalize(context, response.values);
-            ResponseUtility.filterAndSortValues(response, request, context.request);
+            response.values = ResponseUtility.filterAndSortValues(response.values, request, context.request);
         }
     }
 

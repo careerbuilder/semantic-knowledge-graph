@@ -10,26 +10,38 @@ public class ResponseUtility {
 
     // keeps all passed in values, up to request.limit
     // keeps as many generated values as possible up to request.limit
-    public static void filterAndSortValues(ResponseNode response, RequestNode node, RelatednessRequest request) {
-        int limit = Math.min(response.values.length, node.limit);
-        List<ResponseValue> responseValues = new ArrayList<>(Arrays.asList(response.values));
+    public static ResponseValue[] filterAndSortValues(ResponseValue [] responses, RequestNode node, RelatednessRequest request) {
+        int limit = Math.min(responses.length, node.limit);
+        List<ResponseValue> responseValues = new ArrayList<>(Arrays.asList(responses));
         SortUtility.sortResponseValues(responseValues, node.sort);
-        responseValues = thresholdMinPopularity(responseValues, request);
+
+        if (request.return_popularity)
+        {
+            responseValues = thresholdMinPop(responseValues, request.min_popularity);
+        }
+        else
+        {
+            responseValues = thresholdMinFGBGPop(responseValues, request.min_popularity);
+        }
+
         distinct(responseValues);
         if(node.discover_values && responseValues.size() > 0) {
             limit = Math.min(responseValues.size(), node.limit);
             responseValues = filterMergeResults(responseValues, node.values, limit, node.sort);
         }
-        ResponseValue[] shrunk = responseValues.toArray(new ResponseValue[responseValues.size()]);
-        response.values = shrunk;
+        return responseValues.toArray(new ResponseValue[responseValues.size()]);
     }
 
-    public static List<ResponseValue> thresholdMinPopularity(List<ResponseValue> values, RelatednessRequest request) {
+    protected static List<ResponseValue> thresholdMinPop(List<ResponseValue> values, double threshold)
+    {
         values = values.stream().filter((ResponseValue r) ->
-                (r.popularity >= request.min_popularity || !request.return_popularity)
-                && r.background_popularity >= request.min_popularity
-                && r.foreground_popularity >= request.min_popularity).collect(Collectors.toList());
-        return values;
+                (r.popularity >= threshold)).collect(Collectors.toList());
+        return thresholdMinFGBGPop(values, threshold);
+    }
+
+    protected static List<ResponseValue> thresholdMinFGBGPop(List<ResponseValue> values, double threshold) {
+        return values.stream().filter((ResponseValue r) -> (r.background_popularity >= threshold
+                        && r.foreground_popularity >= threshold)).collect(Collectors.toList());
     }
 
     public static void distinct(List<ResponseValue> responseValues)
