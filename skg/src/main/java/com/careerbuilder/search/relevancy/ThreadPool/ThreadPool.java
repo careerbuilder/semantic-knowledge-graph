@@ -4,16 +4,25 @@ import com.careerbuilder.search.relevancy.Runnable.Waitable;
 import org.apache.solr.common.SolrException;
 
 import java.util.LinkedList;
+import java.util.WeakHashMap;
 
 public class ThreadPool
 {
     private final PoolWorker[] threads;
     private final LinkedList<Waitable> queue;
-    private static ThreadLocal<ThreadPool> instance = new ThreadLocal<ThreadPool>() {
-        @Override protected ThreadPool initialValue() { return new ThreadPool(); }};
+    private static Integer ids = 0;
+
+    private static WeakHashMap<Integer, ThreadPool> localPool = new WeakHashMap<>();
+
+    private static final ThreadLocal<Integer> id = new ThreadLocal<Integer>() {
+        @Override protected Integer initialValue() {
+            localPool.put(ids, new ThreadPool());
+            return ids++;
+        }
+    };
 
     public static ThreadPool getInstance() {
-        return instance.get();
+        return localPool.get(id.get());
     }
 
     public ThreadPool()
