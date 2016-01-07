@@ -17,6 +17,7 @@ public class ThreadPool
     private static final ThreadLocal<Integer> id = new ThreadLocal<Integer>() {
         @Override protected Integer initialValue() {
             localPool.put(ids, new ThreadPool());
+            ids = ids % Integer.MAX_VALUE;
             return ids++;
         }
     };
