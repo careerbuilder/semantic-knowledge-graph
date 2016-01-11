@@ -5,10 +5,13 @@ import com.careerbuilder.search.relevancy.Models.ResponseNode;
 import com.careerbuilder.search.relevancy.NodeContext;
 import com.careerbuilder.search.relevancy.RecursionOp;
 import com.careerbuilder.search.relevancy.Runnable.QueryRunner;
+import com.careerbuilder.search.relevancy.Runnable.Waitable;
 import com.careerbuilder.search.relevancy.ThreadPool.ThreadPool;
 import com.careerbuilder.search.relevancy.utility.ResponseUtility;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.Future;
 
 public class NodeScorer implements RecursionOp {
 
@@ -19,12 +22,12 @@ public class NodeScorer implements RecursionOp {
                     ? factory.getQueryRunners(context.queryDomain, responses[i].type) : new QueryRunner[0];
             QueryRunner[] fgRunners = factory.getQueryRunners(context.fgDomain,responses[i].type);
             QueryRunner[] bgRunners = factory.getQueryRunners(context.bgDomain,responses[i].type);
-            ThreadPool.multiplex(qRunners);
-            ThreadPool.multiplex(fgRunners);
-            ThreadPool.multiplex(bgRunners);
-            ThreadPool.demultiplex(qRunners);
-            ThreadPool.demultiplex(fgRunners);
-            ThreadPool.demultiplex(bgRunners);
+            List<Future<Waitable>> q = ThreadPool.multiplex(qRunners);
+            List<Future<Waitable>> fg = ThreadPool.multiplex(fgRunners);
+            List<Future<Waitable>> bg = ThreadPool.multiplex(bgRunners);
+            ThreadPool.demultiplex(q);
+            ThreadPool.demultiplex(fg);
+            ThreadPool.demultiplex(bg);
             String fallbackField = context.parameterSet.invariants.get(responses[i].type + ".fallback");
             if(fallbackField != null)
             {
@@ -48,12 +51,12 @@ public class NodeScorer implements RecursionOp {
                 ? factory.getQueryRunners(context.queryDomain, fallbackField) : new QueryRunner[0];
         QueryRunner[] fallbackFGRunners = factory.getQueryRunners(context.fgDomain, fallbackField);
         QueryRunner[] fallbackBGRunners = factory.getQueryRunners(context.bgDomain, fallbackField);
-        ThreadPool.multiplex(fallbackQRunners);
-        ThreadPool.multiplex(fallbackFGRunners);
-        ThreadPool.multiplex(fallbackBGRunners);
-        ThreadPool.demultiplex(fallbackQRunners);
-        ThreadPool.demultiplex(fallbackFGRunners);
-        ThreadPool.demultiplex(fallbackBGRunners);
+        List<Future<Waitable>> q = ThreadPool.multiplex(fallbackQRunners);
+        List<Future<Waitable>> fg = ThreadPool.multiplex(fallbackFGRunners);
+        List<Future<Waitable>> bg = ThreadPool.multiplex(fallbackBGRunners);
+        ThreadPool.demultiplex(q);
+        ThreadPool.demultiplex(fg);
+        ThreadPool.demultiplex(bg);
         replaceRunners(qRunners, fallbackQRunners, fallbackIndices);
         replaceRunners(fgRunners, fallbackFGRunners, fallbackIndices);
         replaceRunners(bgRunners, fallbackBGRunners, fallbackIndices);

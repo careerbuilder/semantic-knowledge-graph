@@ -18,11 +18,11 @@ public class QueryRunner extends Waitable {
         this.filter = filter;
     }
 
-    public void run() {
+    public Waitable call() {
         try {
             result = searcher.numDocs(query, filter);
         } catch (Exception e) {this.e = e; }
-        notifyCallers();
+        return this;
     }
 
 }
