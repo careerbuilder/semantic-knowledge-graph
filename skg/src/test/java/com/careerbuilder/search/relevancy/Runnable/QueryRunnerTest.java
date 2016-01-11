@@ -36,12 +36,11 @@ public class QueryRunnerTest {
     }
 
     @Test
-    public void run(){
+    public void call(){
         QueryRunner target = new QueryRunner(searcher, query, docSet);
 
-        target.run();
+        target.call();
 
-        Assert.assertEquals(true, target.done);
         Assert.assertEquals(1, target.result);
     }
 }

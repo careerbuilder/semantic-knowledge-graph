@@ -3,112 +3,56 @@ package com.careerbuilder.search.relevancy.ThreadPool;
 import com.careerbuilder.search.relevancy.Runnable.Waitable;
 import org.apache.solr.common.SolrException;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class ThreadPool
 {
-    private final PoolWorker[] threads;
-    private final LinkedList<Waitable> queue;
-    private static Integer ids = 0;
+    private final ExecutorService pool = Executors.newCachedThreadPool();
 
-    private static Map<Integer, ThreadPool> localPool = Collections.synchronizedMap(new WeakHashMap<>());
+    public static ThreadPool getInstance()
+    {
+        return ThreadPoolHolder.pool;
+    }
 
-    private static final ThreadLocal<Integer> id = new ThreadLocal<Integer>() {
-        @Override protected Integer initialValue() {
-            ids = ids % Integer.MAX_VALUE;
-            return ids++;
-        }
-    };
+    public static synchronized Future execute(Waitable w) {
+        return getInstance().pool.submit(w);
+    }
 
-
-
-    public static ThreadPool getInstance() {
-        ThreadPool pool = localPool.get(id.get());
-        if(pool == null)
+    public static List<Waitable> demultiplex(List<Future<Waitable>> futures)
+    {
+        List<Waitable> result = new LinkedList<Waitable>();
+        try
         {
-            pool = new ThreadPool();
-            localPool.put(id.get(), pool);
-        }
-        return pool;
-    }
-
-    public ThreadPool()
-    {
-        queue = new LinkedList<>();
-        int nThreads =40;
-        threads = new PoolWorker[nThreads];
-
-        for (int i=0; i<nThreads; i++) {
-            threads[i] = new PoolWorker();
-            threads[i].start();
-        }
-    }
-
-    public void execute(Waitable w) {
-        synchronized(queue) {
-            queue.addLast(w);
-            queue.notify();
-        }
-    }
-
-    public static void demultiplex(Waitable[] array)
-    {
-        try {
-            for(int i = 0; i < array.length; ++i) {
-                if(array[i] != null) {
-                    synchronized (array[i]) {
-                        if (!array[i].done) {
-                            array[i].wait();
-                        }
-                    }
-                    if (array[i].e != null) {
-                        throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
-                                array[i].e.getMessage(),
-                                array[i].e);
-                    }
-                }
+            for (Future<Waitable> future : futures)
+            {
+                result.add(future.get());
             }
-        } catch (InterruptedException e) {
-            throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
-                    "Parallel operation interrupted");
         }
+        catch (InterruptedException e)
+        {
+            throw new SolrException(
+                    SolrException.ErrorCode.SERVER_ERROR, "Parallel Operation interrupted", e);
+        }
+        catch (ExecutionException e)
+        {
+            throw new SolrException(
+                    SolrException.ErrorCode.SERVER_ERROR, "Execution exception. ", e);
+        }
+        return result;
     }
 
-    public static void multiplex(Waitable [] array)
+    public static List<Future<Waitable>> multiplex(Waitable [] array)
     {
+        LinkedList<Future<Waitable>> futures = new LinkedList<>();
         for(int i = 0; i < array.length; ++i) {
             if(array[i] != null) {
-                getInstance().execute(array[i]);
+                futures.addLast(execute(array[i]));
             }
         }
-    }
-
-    private class PoolWorker extends Thread {
-        public void run() {
-            Waitable w;
-            while (true) {
-                synchronized(queue) {
-                    while (queue.isEmpty()) {
-                        try {
-                            queue.wait();
-                        }
-                        catch (InterruptedException e) {
-                            throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
-                                    "Parallel operation interrupted");
-                        }
-                    }
-                    w = queue.removeFirst();
-                }
-                try {
-                    w.run();
-                }
-                catch (Exception e) {
-                   w.e = e;
-                }
-            }
-        }
+        return futures;
     }
 }

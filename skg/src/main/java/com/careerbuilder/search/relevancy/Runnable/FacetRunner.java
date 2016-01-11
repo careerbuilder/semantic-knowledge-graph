@@ -36,12 +36,12 @@ public class FacetRunner extends Waitable{
         this.limit = limit;
     }
 
-    public void run()
+    public Waitable call()
     {
         try {
             facet();
         } catch (Exception e) { this.e = e; }
-        notifyCallers();
+        return this;
     }
 
     public void facet() throws IOException {

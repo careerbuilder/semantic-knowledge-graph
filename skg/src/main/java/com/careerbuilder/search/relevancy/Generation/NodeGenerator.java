@@ -6,12 +6,15 @@ import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.careerbuilder.search.relevancy.NodeContext;
 import com.careerbuilder.search.relevancy.RecursionOp;
 import com.careerbuilder.search.relevancy.Runnable.FacetRunner;
+import com.careerbuilder.search.relevancy.Runnable.Waitable;
 import com.careerbuilder.search.relevancy.ThreadPool.ThreadPool;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Sort;
 import org.apache.solr.common.util.SimpleOrderedMap;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.Future;
 
 public class NodeGenerator implements RecursionOp {
 
@@ -19,8 +22,8 @@ public class NodeGenerator implements RecursionOp {
         ResponseNode [] resps = new ResponseNode[requests.length];
         FacetFieldAdapter [] adapters = new FacetFieldAdapter[requests.length];
         FacetRunner [] runners = buildRunners(context, requests, adapters);
-        ThreadPool.multiplex(runners);
-        ThreadPool.demultiplex(runners);
+        List<Future<Waitable>> futures = ThreadPool.multiplex(runners);
+        ThreadPool.demultiplex(futures);
         for(int i = 0; i < resps.length; ++i) {
             resps[i] = new ResponseNode(requests[i].type);
             mergeResponseValues(requests[i], resps[i], runners[i], adapters[i]);

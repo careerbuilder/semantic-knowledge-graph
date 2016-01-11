@@ -6,6 +6,7 @@ import com.careerbuilder.search.relevancy.Models.ResponseNode;
 import com.careerbuilder.search.relevancy.NodeContext;
 import com.careerbuilder.search.relevancy.RecursionOp;
 import com.careerbuilder.search.relevancy.Runnable.FacetRunner;
+import com.careerbuilder.search.relevancy.Runnable.Waitable;
 import com.careerbuilder.search.relevancy.ThreadPool.ThreadPool;
 import com.careerbuilder.search.relevancy.utility.MapUtility;
 import org.apache.lucene.search.MatchAllDocsQuery;
@@ -14,6 +15,8 @@ import org.apache.solr.common.util.SimpleOrderedMap;
 
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Future;
 
 public class NodeNormalizer implements RecursionOp {
 
@@ -24,8 +27,8 @@ public class NodeNormalizer implements RecursionOp {
     public ResponseNode [] transform(NodeContext context, RequestNode [] requests, ResponseNode [] responses) throws IOException {
         FacetFieldAdapter [] adapters = buildAdapters(context, requests);
         FacetRunner [] runners = buildRunners(context, requests, adapters);
-        ThreadPool.multiplex(runners);
-        ThreadPool.demultiplex(runners);
+        List<Future<Waitable>> futures = ThreadPool.multiplex(runners);
+        ThreadPool.demultiplex(futures);
         normalizeRequests(requests, adapters, runners);
         return null;
     }

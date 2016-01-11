@@ -8,16 +8,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 @RunWith(JMockit.class)
 public class ThreadPoolTest {
 
-    public class Dummy extends Waitable implements Runnable{
+    public class Dummy extends Waitable implements Callable<Waitable>{
         public int result;
-        public void run()
+        public Waitable call()
         {
             result = 1;
-            notifyCallers();
+            return this;
         }
     }
     Dummy [] dummyRunners = new Dummy[4];
@@ -30,12 +33,11 @@ public class ThreadPoolTest {
         }
     }
 
-
     @Test(timeout=10000)
     public void multiplex_demultiplex() throws IOException
     {
-        ThreadPool.getInstance().multiplex(dummyRunners);
-        ThreadPool.getInstance().demultiplex(dummyRunners);
+        List<Future<Waitable>> futures = ThreadPool.getInstance().multiplex(dummyRunners);
+        ThreadPool.getInstance().demultiplex(futures);
 
         Assert.assertTrue(true);
         for(int i = 0; i < dummyRunners.length; ++i)
