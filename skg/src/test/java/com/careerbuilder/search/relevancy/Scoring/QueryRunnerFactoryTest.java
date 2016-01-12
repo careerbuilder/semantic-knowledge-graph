@@ -5,14 +5,23 @@ import com.careerbuilder.search.relevancy.Models.ResponseNode;
 import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.careerbuilder.search.relevancy.NodeContext;
 import com.careerbuilder.search.relevancy.Runnable.QueryRunner;
+import com.careerbuilder.search.relevancy.utility.ParseUtility;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.TermQuery;
+import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.common.util.ContentStream;
+import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.search.DocListAndSet;
 import org.apache.solr.search.DocSet;
+import org.apache.solr.search.QParser;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.util.RTimer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,6 +29,7 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Map;
 
 @RunWith(JMockit.class)
 public class QueryRunnerFactoryTest
@@ -27,20 +37,33 @@ public class QueryRunnerFactoryTest
 
     @Mocked
     DocSet domain;
-    @Cascading final NodeContext context = new NodeContext(new RelatednessRequest());
+    NodeContext context = new NodeContext(new RelatednessRequest());
     ResponseNode node;
     @Mocked
     SolrIndexSearcher unusedSearcher;
     @Mocked
     SolrQueryRequest unused;
+    @Mocked
+    SolrParams defTypeMap;
 
     @Before
     public void init()
     {
+        unused.setParams(defTypeMap);
         context.req = unused;
 
+        new MockUp<ParseUtility>()
+        {
+            @Mock
+            public Query parseQueryString(String query, SolrQueryRequest req)
+            {
+                return new TermQuery(new Term("test",query));
+            }
+        };
+
+        new ParseUtility();
         new NonStrictExpectations() {{
-            context.req.getSearcher(); returns(unusedSearcher);
+            unused.getSearcher(); returns(unusedSearcher);
         }};
 
         ResponseValue[] values = new ResponseValue[4];
@@ -59,10 +82,10 @@ public class QueryRunnerFactoryTest
         QueryRunnerFactory target = new QueryRunnerFactory(context, node, null);
         QueryRunner[] actual = target.getQueryRunners(domain, "testField");
 
-        Assert.assertEquals("testField:v0",((Query)Deencapsulation.getField(actual[0], "query")).toString());
-        Assert.assertEquals("testField:v1",((Query)Deencapsulation.getField(actual[1], "query")).toString());
-        Assert.assertEquals("testField:v2",((Query)Deencapsulation.getField(actual[2], "query")).toString());
-        Assert.assertEquals("testField:v3",((Query)Deencapsulation.getField(actual[3], "query")).toString());
+        Assert.assertEquals("test:testField:\"v0\"",((Query)Deencapsulation.getField(actual[0], "query")).toString());
+        Assert.assertEquals("test:testField:\"v1\"",((Query)Deencapsulation.getField(actual[1], "query")).toString());
+        Assert.assertEquals("test:testField:\"v2\"",((Query)Deencapsulation.getField(actual[2], "query")).toString());
+        Assert.assertEquals("test:testField:\"v3\"",((Query)Deencapsulation.getField(actual[3], "query")).toString());
     }
 
     @Test
@@ -74,7 +97,7 @@ public class QueryRunnerFactoryTest
         QueryRunner[] actual = target.getQueryRunners(domain, "testField");
 
         Assert.assertEquals(null, actual[0]);
-        Assert.assertEquals("testField:v1",((Query)Deencapsulation.getField(actual[1], "query")).toString());
+        Assert.assertEquals("test:testField:\"v1\"",((Query)Deencapsulation.getField(actual[1], "query")).toString());
         Assert.assertEquals(null, actual[2]);
         Assert.assertEquals(null, actual[3]);
     }

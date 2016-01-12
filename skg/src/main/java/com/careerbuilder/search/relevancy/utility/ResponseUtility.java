@@ -11,25 +11,25 @@ public class ResponseUtility {
     // keeps all passed in values, up to request.limit
     // keeps as many generated values as possible up to request.limit
     public static ResponseValue[] filterAndSortValues(ResponseValue [] responses, RequestNode node, RelatednessRequest request) {
-        int limit = Math.min(responses.length, node.limit);
-        List<ResponseValue> responseValues = new ArrayList<>(Arrays.asList(responses));
-        SortUtility.sortResponseValues(responseValues, node.sort);
+        List<ResponseValue> scoredValues = new ArrayList<>(Arrays.asList(responses));
+        SortUtility.sortResponseValues(scoredValues, node.sort);
+
 
         if (request.return_popularity)
         {
-            responseValues = thresholdMinPop(responseValues, request.min_popularity);
+            scoredValues = thresholdMinPop(scoredValues, request.min_popularity);
         }
         else
         {
-            responseValues = thresholdMinFGBGPop(responseValues, request.min_popularity);
+            scoredValues = thresholdMinFGBGPop(scoredValues, request.min_popularity);
         }
-
-        distinct(responseValues);
-        if(node.discover_values && responseValues.size() > 0) {
-            limit = Math.min(responseValues.size(), node.limit);
-            responseValues = filterMergeResults(responseValues, node.values, limit, node.sort);
+        distinct(scoredValues);
+        if(node.discover_values && scoredValues.size() > 0) {
+            List<String> requestValues = distinct(node.values);
+            int limit = Math.min(scoredValues.size(), node.limit);
+            scoredValues = filterMergeResults(scoredValues, requestValues, limit, node.sort);
         }
-        return responseValues.toArray(new ResponseValue[responseValues.size()]);
+        return scoredValues.toArray(new ResponseValue[scoredValues.size()]);
     }
 
     protected static List<ResponseValue> thresholdMinPop(List<ResponseValue> values, double threshold)
@@ -44,6 +44,14 @@ public class ResponseUtility {
                         && r.foreground_popularity >= threshold)).collect(Collectors.toList());
     }
 
+    protected static List<String> distinct(String [] requestValues )
+    {
+        return new LinkedList<>(
+                (Arrays.stream(requestValues == null ? new String[0] : requestValues).collect(
+                        Collectors.toMap(String::toLowerCase, s -> s, (first, second) -> first))
+                        .values()));
+    }
+
     public static void distinct(List<ResponseValue> responseValues)
     {
         for(int i = 1; i < responseValues.size();) {
@@ -55,9 +63,10 @@ public class ResponseUtility {
     }
 
     // move any keep values (request values) beyond the request limit to just within the request limit, replacing generated values
-    public static List<ResponseValue> filterMergeResults(List<ResponseValue> results, String[] requestValues, int limit, SortType sort)
+    public static List<ResponseValue> filterMergeResults(List<ResponseValue> results,
+                                                         List<String> requestValues, int limit, SortType sort)
     {
-        List<String> keepSet = Arrays.asList(requestValues == null ? new String[0] : requestValues);
+        List<String> keepSet = requestValues == null ? new LinkedList<>() : requestValues;
         if (keepSet.size() > results.size())
             throw new IllegalArgumentException("The keep set is larger than the results set.");
 

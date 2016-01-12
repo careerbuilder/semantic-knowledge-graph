@@ -7,6 +7,7 @@ import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.careerbuilder.search.relevancy.Normalization.NodeNormalizer;
 import com.careerbuilder.search.relevancy.Scoring.NodeScorer;
 import com.careerbuilder.search.relevancy.Generation.NodeGenerator;
+import com.careerbuilder.search.relevancy.utility.ParseUtility;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.lucene.search.MatchAllDocsQuery;
@@ -116,9 +117,9 @@ public class RequestTreeRecurserTest {
 
     @Test
     public void recurseComparables_TwoTrunkTree() throws IOException {
-        new MockUp<NodeContext>() {
+        new MockUp<ParseUtility>() {
             @Mock
-            private Query parseQueryString(String qString)
+            private Query parseQueryString(String qString, SolrQueryRequest req)
             {
                 return new MatchAllDocsQuery();
             }

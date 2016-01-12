@@ -4,6 +4,7 @@ import com.careerbuilder.search.relevancy.Models.ResponseNode;
 import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.careerbuilder.search.relevancy.NodeContext;
 import com.careerbuilder.search.relevancy.Runnable.QueryRunner;
+import com.careerbuilder.search.relevancy.utility.ParseUtility;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
@@ -29,7 +30,9 @@ public class QueryRunnerFactory
         QueryRunner [] runners = new QueryRunner[response.values.length];
         for(int k = 0; k < response.values.length; ++k) {
             if(fallbackIndices == null || fallbackIndices.contains(k)) {
-                Query query = new TermQuery(new Term(field, response.values[k].value.toLowerCase().trim()));
+                Query query = ParseUtility.parseQueryString(field
+                                + ":\"" + response.values[k].value.toLowerCase().trim() + "\"",
+                        context.req);
                 runners[k] = new QueryRunner(context.req.getSearcher(), query, domain);
             }
         }

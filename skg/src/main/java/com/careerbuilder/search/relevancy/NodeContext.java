@@ -2,6 +2,7 @@ package com.careerbuilder.search.relevancy;
 
 import com.careerbuilder.search.relevancy.Models.ParameterSet;
 import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
+import com.careerbuilder.search.relevancy.utility.ParseUtility;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.solr.common.SolrException;
@@ -42,14 +43,14 @@ public class NodeContext {
         this.request = request;
         this.req = req;
         this.parameterSet = parameterSet;
-        this.queries = parseQueryStrings(request.queries);
+        this.queries = ParseUtility.parseQueryStrings(request.queries, req);
         if(request.foreground_queries == null) {
             this.fgQueries = this.queries;
         }
         else {
-            this.fgQueries = parseQueryStrings(request.foreground_queries);
+            this.fgQueries = ParseUtility.parseQueryStrings(request.foreground_queries, req);
         }
-        this.bgQueries = parseQueryStrings(request.background_queries);
+        this.bgQueries = ParseUtility.parseQueryStrings(request.background_queries, req);
         this.queryDomain = req.getSearcher().getDocSet(queries);
         this.fgDomain= req.getSearcher().getDocSet(fgQueries);
         this.bgDomain = req.getSearcher().getDocSet(bgQueries);
@@ -64,33 +65,12 @@ public class NodeContext {
         this.queries = parent.queries;
         this.fgQueries = parent.fgQueries;
         this.bgQueries = parent.bgQueries;
-        this.queryDomain = req.getSearcher().getDocSet(parseQueryString(filterQueryString), parent.queryDomain);
-        this.fgDomain= req.getSearcher().getDocSet(parseQueryString(filterQueryString), parent.fgDomain);
+        this.queryDomain = req.getSearcher().getDocSet(ParseUtility.parseQueryString(filterQueryString, req), parent.queryDomain);
+        this.fgDomain= req.getSearcher().getDocSet(ParseUtility.parseQueryString(filterQueryString, req), parent.fgDomain);
         this.bgDomain= parent.bgDomain;
     }
 
     public NodeContext() {}
 
-    private List<Query> parseQueryStrings(String [] qStrings) {
-        if(qStrings != null) {
-            LinkedList<Query> queryList = new LinkedList<Query>();
-            for (String qString : qStrings) {
-                queryList.add(parseQueryString(qString));
-            }
-            return queryList;
-        }
-        List<Query> deflt = new LinkedList<>();
-        deflt.add(new MatchAllDocsQuery());
-        return deflt;
-    }
 
-    private Query parseQueryString(String qString) {
-        try {
-            QParser parser = QParser.getParser(qString, req.getParams().get("defType"), req);
-            return parser.getQuery();
-        } catch (SyntaxError e) {
-            throw new SolrException(SolrException.ErrorCode.BAD_REQUEST,
-                    "Syntax error in query: " + qString + ".");
-        }
-    }
 }
