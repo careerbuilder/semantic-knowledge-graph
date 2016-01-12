@@ -6,6 +6,7 @@ import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.careerbuilder.search.relevancy.Models.SortType;
 import com.careerbuilder.search.relevancy.utility.ResponseUtility;
 import com.careerbuilder.search.relevancy.utility.SortUtility;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,6 +22,7 @@ public class ResponseUtilityTest {
     private List<ResponseValue> valuesDups;
     private List<ResponseValue> values;
     private ResponseNode node;
+    private String [] requestValuesDups = new String [] { "v1", "v1", "v3", "V3", "V3", "v4"};
 
     @Before
     public void init()
@@ -53,6 +55,16 @@ public class ResponseUtilityTest {
         values.add(v3);
         values.add(v4);
     }
+
+    @Test
+    public void distinct_Request()
+    {
+        String [] expected = new String[] {"v1", "v3", "v4"};
+        List<String> actual = ResponseUtility.distinct(requestValuesDups);
+
+        Assert.assertArrayEquals(expected, actual.toArray(new String[0]));
+    }
+
     @Test
     public void distinct()
     {
