@@ -6,9 +6,11 @@ import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import com.careerbuilder.search.relevancy.Models.SortType;
 import com.careerbuilder.search.relevancy.utility.ResponseUtility;
 import com.careerbuilder.search.relevancy.utility.SortUtility;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,6 +22,7 @@ public class ResponseUtilityTest {
     private List<ResponseValue> valuesDups;
     private List<ResponseValue> values;
     private ResponseNode node;
+    private String [] requestValuesDups = new String [] { "v1", "v1", "v3", "V3", "V3", "v4"};
 
     @Before
     public void init()
@@ -52,6 +55,16 @@ public class ResponseUtilityTest {
         values.add(v3);
         values.add(v4);
     }
+
+    @Test
+    public void distinct_Request()
+    {
+        String [] expected = new String[] {"v1", "v3", "v4"};
+        List<String> actual = ResponseUtility.distinct(requestValuesDups);
+
+        Assert.assertArrayEquals(expected, actual.toArray(new String[0]));
+    }
+
     @Test
     public void distinct()
     {
@@ -68,7 +81,7 @@ public class ResponseUtilityTest {
     @Test
     public void filterMergeKeep()
     {
-        String [] keep = new String[] {"v4"};
+        List<String> keep = Arrays.asList(new String [] {"v4"});
 
         List<ResponseValue> actual = ResponseUtility.filterMergeResults(values, keep, 2, SortType.foreground_popularity);
 
@@ -80,7 +93,7 @@ public class ResponseUtilityTest {
     @Test
     public void filterMerge_noKeep()
     {
-        String [] keep = new String[] {};
+        List<String> keep = new LinkedList<>();
 
         List<ResponseValue> actual = ResponseUtility.filterMergeResults(values, keep, 2, SortType.foreground_popularity);
 
@@ -92,7 +105,7 @@ public class ResponseUtilityTest {
     @Test
     public void filterMergeOnlyKeep()
     {
-        String [] keep = new String[] { "v3", "v4", "v2"};
+        List<String> keep = Arrays.asList(new String [] { "v3", "v4", "v2"});
 
         List<ResponseValue> actual = ResponseUtility.filterMergeResults(values, keep, 2, SortType.foreground_popularity);
 
@@ -105,7 +118,7 @@ public class ResponseUtilityTest {
     @Test(expected= IllegalArgumentException.class)
     public void filterMergeException()
     {
-        String [] keep = new String[] { "v3", "v4", "v2", "v2", "v2"};
+        List<String> keep = Arrays.asList(new String[]{"v3", "v4", "v2", "v2", "v2"});
 
         List<ResponseValue> actual = ResponseUtility.filterMergeResults(values, keep, 2, SortType.foreground_popularity);
     }

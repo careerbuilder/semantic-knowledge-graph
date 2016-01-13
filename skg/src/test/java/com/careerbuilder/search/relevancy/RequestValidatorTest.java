@@ -3,6 +3,7 @@ package com.careerbuilder.search.relevancy;
 import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
 import com.careerbuilder.search.relevancy.Models.RequestNode;
 import com.careerbuilder.search.relevancy.Models.ResponseNode;
+import com.careerbuilder.search.relevancy.utility.ParseUtility;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.Mocked;
@@ -69,9 +70,9 @@ public class RequestValidatorTest {
 
     @Test
     public void validate_TwoTrunkTreeCompare() throws IOException {
-        new MockUp<NodeContext>() {
+        new MockUp<ParseUtility>() {
             @Mock
-            private Query parseQueryString(String qString)
+            private Query parseQueryString(String qString, SolrQueryRequest req)
             {
                 return new MatchAllDocsQuery();
             }
@@ -94,9 +95,9 @@ public class RequestValidatorTest {
 
     @Test(expected = SolrException.class)
     public void validate_TwoTrunkTreeCompareException() throws IOException {
-        new MockUp<NodeContext>() {
+        new MockUp<ParseUtility>() {
             @Mock
-            private Query parseQueryString(String qString)
+            private Query parseQueryString(String qString, SolrQueryRequest req)
             {
                 return new MatchAllDocsQuery();
             }
