@@ -1,7 +1,7 @@
-package com.careerbuilder.search.relevancy.Generation;
+package com.careerbuilder.search.relevancy.generation;
 
 import com.careerbuilder.search.relevancy.FieldChecker;
-import com.careerbuilder.search.relevancy.Models.ParameterSet;
+import com.careerbuilder.search.relevancy.model.ParameterSet;
 import com.careerbuilder.search.relevancy.NodeContext;
 import mockit.Mock;
 import mockit.MockUp;

@@ -1,7 +1,6 @@
 package com.careerbuilder.search.relevancy.utility;
 
-import com.careerbuilder.search.relevancy.Models.*;
-import com.careerbuilder.search.relevancy.utility.SortUtility;
+import com.careerbuilder.search.relevancy.model.*;
 
 import java.util.*;
 import java.util.stream.Collectors;

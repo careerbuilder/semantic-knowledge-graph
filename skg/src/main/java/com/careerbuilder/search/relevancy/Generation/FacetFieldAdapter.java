@@ -1,8 +1,7 @@
-package com.careerbuilder.search.relevancy.Generation;
+package com.careerbuilder.search.relevancy.generation;
 
 import com.careerbuilder.search.relevancy.FieldChecker;
 import com.careerbuilder.search.relevancy.NodeContext;
-import org.apache.solr.common.SolrException;
 import org.apache.solr.common.util.SimpleOrderedMap;
 
 public class FacetFieldAdapter {

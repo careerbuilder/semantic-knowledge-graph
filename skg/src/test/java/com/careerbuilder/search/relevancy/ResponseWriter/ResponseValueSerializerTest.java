@@ -1,6 +1,6 @@
-package com.careerbuilder.search.relevancy.ResponseWriter;
+package com.careerbuilder.search.relevancy.responsewriter;
 
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
+import com.careerbuilder.search.relevancy.model.ResponseValue;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import mockit.integration.junit4.JMockit;

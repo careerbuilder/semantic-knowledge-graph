@@ -1,6 +1,6 @@
-package com.careerbuilder.search.relevancy.ThreadPool;
+package com.careerbuilder.search.relevancy.threadpool;
 
-import com.careerbuilder.search.relevancy.Runnable.Waitable;
+import com.careerbuilder.search.relevancy.runnable.Waitable;
 import org.apache.solr.common.SolrException;
 
 import java.util.*;
@@ -29,7 +29,13 @@ public class ThreadPool
         {
             for (Future<Waitable> future : futures)
             {
-                result.add(future.get());
+                Waitable w = future.get();
+                if(w.e != null)
+                {
+                    throw new SolrException(SolrException.ErrorCode.SERVER_ERROR,
+                            "Error executing thread. ", w.e);
+                }
+                result.add(w);
             }
         }
         catch (InterruptedException e)

@@ -1,6 +1,6 @@
-package com.careerbuilder.search.relevancy.Scoring;
+package com.careerbuilder.search.relevancy.scoring;
 
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
+import com.careerbuilder.search.relevancy.model.ResponseValue;
 import mockit.Deencapsulation;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;

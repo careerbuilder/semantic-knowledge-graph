@@ -1,4 +1,4 @@
-package com.careerbuilder.search.relevancy.Runnable;
+package com.careerbuilder.search.relevancy.runnable;
 
 import com.careerbuilder.search.relevancy.NodeContext;
 import org.apache.solr.common.params.FacetParams;
@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.util.*;
 
 public class FacetRunner extends Waitable{
-
 
     private int limit;
     private String field;
@@ -61,8 +60,8 @@ public class FacetRunner extends Waitable{
         return rb;
     }
 
-    // this is kind of awkward, but necessary since JsON faceting is protected in Solr,
-    // (we can only interact with it by mocking up a request and parsing a response).
+    // this is kind of awkward, but necessary since JSON faceting is protected in Solr,
+    // (we can only interact with through a Map request).
     private void parseResponse(SolrQueryResponse resp) {
         SimpleOrderedMap<Object> facet = (SimpleOrderedMap<Object>)
                 ((SimpleOrderedMap<Object>)((SimpleOrderedMap<Object>) resp.getValues()).get("facets")).get(QUERY_FACET_NAME);
@@ -112,5 +111,4 @@ public class FacetRunner extends Waitable{
         paramMap.put(FacetParams.FACET, "true");
         return new MapSolrParams(paramMap);
     }
-
 }

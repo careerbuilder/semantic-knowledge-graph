@@ -1,8 +1,5 @@
-package com.careerbuilder.search.relevancy.Model;
+package com.careerbuilder.search.relevancy.model;
 
-import com.careerbuilder.search.relevancy.Models.ResponseNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
-import com.careerbuilder.search.relevancy.Models.SortType;
 import com.careerbuilder.search.relevancy.utility.SortUtility;
 import org.junit.Before;
 import org.junit.Test;

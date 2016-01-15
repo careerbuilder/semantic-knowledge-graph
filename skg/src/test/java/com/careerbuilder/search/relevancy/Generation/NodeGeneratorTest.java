@@ -1,12 +1,12 @@
-package com.careerbuilder.search.relevancy.Generation;
+package com.careerbuilder.search.relevancy.generation;
 
 import com.careerbuilder.search.relevancy.utility.MapUtility;
-import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
-import com.careerbuilder.search.relevancy.Models.RequestNode;
-import com.careerbuilder.search.relevancy.Models.ResponseNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
+import com.careerbuilder.search.relevancy.model.RelatednessRequest;
+import com.careerbuilder.search.relevancy.model.RequestNode;
+import com.careerbuilder.search.relevancy.model.ResponseNode;
+import com.careerbuilder.search.relevancy.model.ResponseValue;
 import com.careerbuilder.search.relevancy.NodeContext;
-import com.careerbuilder.search.relevancy.Runnable.FacetRunner;
+import com.careerbuilder.search.relevancy.runnable.FacetRunner;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.lucene.search.Query;

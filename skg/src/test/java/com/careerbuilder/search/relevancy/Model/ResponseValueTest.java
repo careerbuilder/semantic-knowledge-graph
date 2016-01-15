@@ -1,6 +1,5 @@
-package com.careerbuilder.search.relevancy.Model;
+package com.careerbuilder.search.relevancy.model;
 
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
 import mockit.integration.junit4.JMockit;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.junit.Assert;

@@ -1,15 +1,17 @@
-package com.careerbuilder.search.relevancy.Scoring;
+package com.careerbuilder.search.relevancy.scoring;
 
-import com.careerbuilder.search.relevancy.Models.RequestNode;
-import com.careerbuilder.search.relevancy.Models.ResponseNode;
+import com.careerbuilder.search.relevancy.model.RequestNode;
+import com.careerbuilder.search.relevancy.model.ResponseNode;
 import com.careerbuilder.search.relevancy.NodeContext;
 import com.careerbuilder.search.relevancy.RecursionOp;
-import com.careerbuilder.search.relevancy.Runnable.QueryRunner;
-import com.careerbuilder.search.relevancy.Runnable.Waitable;
-import com.careerbuilder.search.relevancy.ThreadPool.ThreadPool;
+import com.careerbuilder.search.relevancy.model.ResponseValue;
+import com.careerbuilder.search.relevancy.runnable.QueryRunner;
+import com.careerbuilder.search.relevancy.runnable.Waitable;
+import com.careerbuilder.search.relevancy.threadpool.ThreadPool;
 import com.careerbuilder.search.relevancy.utility.ResponseUtility;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -18,91 +20,58 @@ public class NodeScorer implements RecursionOp {
     public ResponseNode[] transform(NodeContext context, RequestNode[] requests, ResponseNode[] responses) {
         for(int i = 0; i < responses.length; ++i) {
             QueryRunnerFactory factory = new QueryRunnerFactory(context, responses[i], null);
-            QueryRunner[] qRunners = context.request.return_popularity
-                    ? factory.getQueryRunners(context.queryDomain, responses[i].type) : new QueryRunner[0];
-            QueryRunner[] fgRunners = factory.getQueryRunners(context.fgDomain,responses[i].type);
-            QueryRunner[] bgRunners = factory.getQueryRunners(context.bgDomain,responses[i].type);
-            List<Future<Waitable>> q = ThreadPool.multiplex(qRunners);
-            List<Future<Waitable>> fg = ThreadPool.multiplex(fgRunners);
-            List<Future<Waitable>> bg = ThreadPool.multiplex(bgRunners);
-            ThreadPool.demultiplex(q);
-            ThreadPool.demultiplex(fg);
-            ThreadPool.demultiplex(bg);
+
+            List<QueryRunner> qRunners = new LinkedList<>();
+            qRunners.addAll(factory.getQueryRunners(context.fgDomain,
+                    responses[i].type, QueryRunner.QueryType.FG));
+            qRunners.addAll(factory.getQueryRunners(context.bgDomain,
+                    responses[i].type, QueryRunner.QueryType.BG));
+            if(context.request.return_popularity)
+                qRunners.addAll(factory.getQueryRunners(context.queryDomain, responses[i].type, QueryRunner.QueryType.Q));
+
+            parallelQuery(qRunners);
+
             String fallbackField = context.parameterSet.invariants.get(responses[i].type + ".fallback");
             if(fallbackField != null)
             {
-                runFallback(context, responses[i], fgRunners, bgRunners, qRunners, fallbackField);
+                new FallbackScorer().runFallback(context, responses[i], qRunners, fallbackField);
             }
-            addQueryResults(responses[i], fgRunners, bgRunners, qRunners);
+            addQueryResults(responses[i], qRunners);
             processResponse(context, responses[i], requests[i]);
         }
         return responses;
     }
 
-    private void runFallback(NodeContext context,
-                             ResponseNode response,
-                             QueryRunner[] fgRunners,
-                             QueryRunner[] bgRunners,
-                             QueryRunner[] qRunners,
-                             String fallbackField) {
-        HashSet<Integer> fallbackIndices = getFallbackIndices(fgRunners, context.request.min_popularity);
-        QueryRunnerFactory factory = new QueryRunnerFactory(context, response, fallbackIndices);
-        QueryRunner[] fallbackQRunners = context.request.return_popularity
-                ? factory.getQueryRunners(context.queryDomain, fallbackField) : new QueryRunner[0];
-        QueryRunner[] fallbackFGRunners = factory.getQueryRunners(context.fgDomain, fallbackField);
-        QueryRunner[] fallbackBGRunners = factory.getQueryRunners(context.bgDomain, fallbackField);
-        List<Future<Waitable>> q = ThreadPool.multiplex(fallbackQRunners);
-        List<Future<Waitable>> fg = ThreadPool.multiplex(fallbackFGRunners);
-        List<Future<Waitable>> bg = ThreadPool.multiplex(fallbackBGRunners);
-        ThreadPool.demultiplex(q);
-        ThreadPool.demultiplex(fg);
-        ThreadPool.demultiplex(bg);
-        replaceRunners(qRunners, fallbackQRunners, fallbackIndices);
-        replaceRunners(fgRunners, fallbackFGRunners, fallbackIndices);
-        replaceRunners(bgRunners, fallbackBGRunners, fallbackIndices);
-    }
-
-    private void replaceRunners(QueryRunner [] target, QueryRunner [] source, HashSet<Integer> targetPositions) {
-        int k = 0;
-        for(int i = 0; i < target.length; ++i) {
-            if (targetPositions.contains(i)) {
-               target[i] = source[k++];
-            }
-        }
-    }
-
-    private HashSet<Integer> getFallbackIndices(QueryRunner [] values, double minCount)
+    protected static void parallelQuery(List<QueryRunner> qRunners)
     {
-        HashSet<Integer> indices = new HashSet<>();
-        for(int i = 0; i < values.length; ++i) {
-            if(values[i].result < minCount || values[i].result == 0) {
-                indices.add(i);
-            }
-        }
-        return indices;
+        List<Future<Waitable>> futures = new LinkedList<>();
+        futures.addAll(ThreadPool.multiplex(qRunners.toArray(new Waitable[0])));
+        ThreadPool.demultiplex(futures);
     }
 
-    private void addQueryResults(ResponseNode response, QueryRunner[] fgRunners, QueryRunner[] bgRunners, QueryRunner [] qRunners) {
-        for(int k = 0; k < qRunners.length; ++k)
+    private void addQueryResults(ResponseNode response, List<QueryRunner> qRunners) {
+        for(QueryRunner queryRunner : qRunners )
         {
-            if (qRunners[k] != null)
+            if (queryRunner != null)
             {
-                response.values[k].popularity = qRunners[k].result;
+                setResultValue(response.values[queryRunner.index], queryRunner.result, queryRunner.type);
             }
         }
-        for(int k = 0; k < fgRunners.length; ++k)
+    }
+
+    private void setResultValue(ResponseValue toSet, double result, QueryRunner.QueryType type)
+    {
+        switch(type)
         {
-            if (fgRunners[k] != null)
-            {
-                response.values[k].foreground_popularity = fgRunners[k].result;
-            }
-        }
-        for(int k = 0; k < bgRunners.length; ++k)
-        {
-            if(bgRunners[k] != null)
-            {
-                response.values[k].background_popularity= bgRunners[k].result;
-            }
+            case FG:
+                toSet.foreground_popularity = result;
+                break;
+            case BG:
+                toSet.background_popularity = result;
+                break;
+            case Q:
+                toSet.popularity = result;
+                break;
         }
     }
 

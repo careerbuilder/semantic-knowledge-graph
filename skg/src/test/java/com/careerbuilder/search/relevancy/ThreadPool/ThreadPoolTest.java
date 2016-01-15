@@ -1,6 +1,6 @@
-package com.careerbuilder.search.relevancy.ThreadPool;
+package com.careerbuilder.search.relevancy.threadpool;
 
-import com.careerbuilder.search.relevancy.Runnable.Waitable;
+import com.careerbuilder.search.relevancy.runnable.Waitable;
 import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Before;

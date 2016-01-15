@@ -1,16 +1,13 @@
 package com.careerbuilder.search.relevancy;
 
-import com.careerbuilder.search.relevancy.Models.ParameterSet;
-import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
+import com.careerbuilder.search.relevancy.model.ParameterSet;
+import com.careerbuilder.search.relevancy.model.RelatednessRequest;
 import com.careerbuilder.search.relevancy.utility.ParseUtility;
-import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
-import org.apache.solr.common.SolrException;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.search.*;
 
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
 
 public class NodeContext {

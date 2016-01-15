@@ -1,12 +1,12 @@
 package com.careerbuilder.search.relevancy;
 
-import com.careerbuilder.search.relevancy.Generation.NodeGenerator;
-import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
-import com.careerbuilder.search.relevancy.Models.RequestNode;
-import com.careerbuilder.search.relevancy.Models.ResponseNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
-import com.careerbuilder.search.relevancy.Normalization.NodeNormalizer;
-import com.careerbuilder.search.relevancy.Scoring.NodeScorer;
+import com.careerbuilder.search.relevancy.generation.NodeGenerator;
+import com.careerbuilder.search.relevancy.model.RelatednessRequest;
+import com.careerbuilder.search.relevancy.model.RequestNode;
+import com.careerbuilder.search.relevancy.model.ResponseNode;
+import com.careerbuilder.search.relevancy.model.ResponseValue;
+import com.careerbuilder.search.relevancy.normalization.NodeNormalizer;
+import com.careerbuilder.search.relevancy.scoring.NodeScorer;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package com.careerbuilder.search.relevancy.ThreadPool;
+package com.careerbuilder.search.relevancy.threadpool;
 
 import com.careerbuilder.search.relevancy.utility.MapUtility;
 import org.apache.solr.common.util.SimpleOrderedMap;

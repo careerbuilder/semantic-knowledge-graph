@@ -1,13 +1,13 @@
-package com.careerbuilder.search.relevancy.Generation;
+package com.careerbuilder.search.relevancy.generation;
 
-import com.careerbuilder.search.relevancy.Models.RequestNode;
-import com.careerbuilder.search.relevancy.Models.ResponseNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
+import com.careerbuilder.search.relevancy.model.RequestNode;
+import com.careerbuilder.search.relevancy.model.ResponseNode;
+import com.careerbuilder.search.relevancy.model.ResponseValue;
 import com.careerbuilder.search.relevancy.NodeContext;
 import com.careerbuilder.search.relevancy.RecursionOp;
-import com.careerbuilder.search.relevancy.Runnable.FacetRunner;
-import com.careerbuilder.search.relevancy.Runnable.Waitable;
-import com.careerbuilder.search.relevancy.ThreadPool.ThreadPool;
+import com.careerbuilder.search.relevancy.runnable.FacetRunner;
+import com.careerbuilder.search.relevancy.runnable.Waitable;
+import com.careerbuilder.search.relevancy.threadpool.ThreadPool;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Sort;
 import org.apache.solr.common.util.SimpleOrderedMap;
@@ -60,7 +60,9 @@ public class NodeGenerator implements RecursionOp {
         }
     }
 
-    private FacetRunner [] buildRunners(NodeContext context, RequestNode [] requests, FacetFieldAdapter [] adapters) throws IOException {
+    private FacetRunner [] buildRunners(NodeContext context,
+                                        RequestNode [] requests,
+                                        FacetFieldAdapter [] adapters) throws IOException {
         FacetRunner [] runners = new FacetRunner[requests.length];
         for(int i = 0; i < requests.length; ++i) {
             adapters[i] = new FacetFieldAdapter(context, requests[i].type);

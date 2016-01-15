@@ -1,4 +1,4 @@
-package com.careerbuilder.search.relevancy.ThreadPool;
+package com.careerbuilder.search.relevancy.threadpool;
 
 public class ThreadPoolHolder
 {

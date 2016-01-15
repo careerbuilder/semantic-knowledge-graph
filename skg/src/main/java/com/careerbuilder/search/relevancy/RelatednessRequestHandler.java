@@ -1,8 +1,8 @@
 package com.careerbuilder.search.relevancy;
 
-import com.careerbuilder.search.relevancy.Models.ParameterSet;
-import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
-import com.careerbuilder.search.relevancy.Models.RelatednessResponse;
+import com.careerbuilder.search.relevancy.model.ParameterSet;
+import com.careerbuilder.search.relevancy.model.RelatednessRequest;
+import com.careerbuilder.search.relevancy.model.RelatednessResponse;
 import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
 import org.apache.lucene.analysis.util.ResourceLoader;

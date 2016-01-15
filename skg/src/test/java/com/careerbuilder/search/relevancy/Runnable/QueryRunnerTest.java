@@ -1,4 +1,4 @@
-package com.careerbuilder.search.relevancy.Runnable;
+package com.careerbuilder.search.relevancy.runnable;
 
 import com.careerbuilder.search.relevancy.NodeContext;
 import mockit.Expectations;
@@ -37,7 +37,7 @@ public class QueryRunnerTest {
 
     @Test
     public void call(){
-        QueryRunner target = new QueryRunner(searcher, query, docSet);
+        QueryRunner target = new QueryRunner(searcher, query, docSet, QueryRunner.QueryType.FG, 1);
 
         target.call();
 
