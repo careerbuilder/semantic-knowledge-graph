@@ -9,6 +9,7 @@ import com.careerbuilder.search.relevancy.runnable.QueryRunner;
 import com.careerbuilder.search.relevancy.runnable.Waitable;
 import com.careerbuilder.search.relevancy.threadpool.ThreadPool;
 import com.careerbuilder.search.relevancy.utility.ResponseUtility;
+import org.apache.solr.common.SolrException;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -72,6 +73,8 @@ public class NodeScorer implements RecursionOp {
             case Q:
                 toSet.popularity = result;
                 break;
+            default:
+                throw new SolrException(SolrException.ErrorCode.SERVER_ERROR, "Unknown QueryType.");
         }
     }
 

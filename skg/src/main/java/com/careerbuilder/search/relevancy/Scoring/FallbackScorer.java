@@ -29,7 +29,7 @@ public class FallbackScorer
         replaceRunners(qRunners, fallbackRunners);
     }
 
-    private HashSet<Integer> getFallbackIndices(List<QueryRunner> values, double minCount)
+    protected HashSet<Integer> getFallbackIndices(List<QueryRunner> values, double minCount)
     {
         HashSet<Integer> indices = new HashSet<>();
         for(QueryRunner runner : values)
@@ -41,8 +41,8 @@ public class FallbackScorer
         return indices;
     }
 
-    private void replaceRunners(List<QueryRunner> target, List<QueryRunner> source) {
-        target.removeAll(source);
-        target.addAll(source);
+    protected void replaceRunners(List<QueryRunner> target, List<QueryRunner> replacers) {
+        target.removeAll(replacers);
+        target.addAll(replacers);
     }
 }

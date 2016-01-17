@@ -20,8 +20,6 @@ import java.util.concurrent.Future;
 
 public class NodeNormalizer implements RecursionOp {
 
-    // this is the map index whose value should match the passed in value
-    private static final String STRING_VALUE_IDENTIFIER = "name";
     private static final int DEFAULT_NORM_LIMIT = 100;
 
     public ResponseNode [] transform(NodeContext context, RequestNode [] requests, ResponseNode [] responses) throws IOException {

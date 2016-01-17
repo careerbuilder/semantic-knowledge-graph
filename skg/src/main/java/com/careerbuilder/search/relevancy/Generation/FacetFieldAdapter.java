@@ -8,12 +8,13 @@ public class FacetFieldAdapter {
 
     NodeContext context;
 
-    static final String FACET_FIELD_DELIMITER = "-";
-    static final String FACET_FIELD_VALUE_DELIMITER= "^";
 
     public String field;
     public String baseField;
     private String facetFieldExtension;
+    private String globalFacetFieldExtension;
+    private String facetFieldDelimiter= "-";
+    private String facetFieldValueDelimiter = "^";
 
     @Deprecated
     public FacetFieldAdapter(String field) {
@@ -25,6 +26,9 @@ public class FacetFieldAdapter {
     {
         this.context = context;
         this.facetFieldExtension = context.parameterSet.invariants.get(field + ".facet-field", "");
+        this.globalFacetFieldExtension = context.parameterSet.invariants.get("facet-field-extension", "cs");
+        this.facetFieldDelimiter = context.parameterSet.invariants.get("facet-field-delimiter", "-");
+        this.facetFieldValueDelimiter = context.parameterSet.invariants.get("facet-field-value-delimiter", "^");
         FieldChecker.checkField(context.req, field, field);
         this.baseField = field;
         this.field = buildField(field);
@@ -35,8 +39,8 @@ public class FacetFieldAdapter {
         if(facetFieldExtension != null && !facetFieldExtension.equals("")) {
             result = new SimpleOrderedMap<>();
             String value = (String) bucket.get("val");
-            String[] facetFieldKeys = facetFieldExtension.split(FACET_FIELD_DELIMITER);
-            String[] facetFieldValues = value.split("\\"+FACET_FIELD_VALUE_DELIMITER);
+            String[] facetFieldKeys = facetFieldExtension.split(facetFieldDelimiter);
+            String[] facetFieldValues = value.split("\\"+facetFieldValueDelimiter);
             for (int i = 0; i < facetFieldKeys.length && i < facetFieldValues.length; ++i) {
                 if(!facetFieldValues.equals("")) {
                     result.add(facetFieldKeys[i], facetFieldValues[i]);
@@ -49,7 +53,7 @@ public class FacetFieldAdapter {
     public String getStringValue(SimpleOrderedMap<Object> bucket)
     {
         String value = (String) bucket.get("val");
-        return value.replace(FACET_FIELD_VALUE_DELIMITER, " ");
+        return value.replace(facetFieldValueDelimiter, " ");
     }
 
     private String buildField(String field) {
@@ -65,7 +69,7 @@ public class FacetFieldAdapter {
         } else {
             facetField.append(field).append(".").append(extension);
         }
-        return facetField.append(".cs").toString();
+        return facetField.append(".").append(globalFacetFieldExtension).toString();
     }
 
     public boolean hasExtension()

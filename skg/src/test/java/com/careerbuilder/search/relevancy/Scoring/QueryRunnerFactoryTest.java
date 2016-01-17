@@ -75,10 +75,22 @@ public class QueryRunnerFactoryTest
         QueryRunnerFactory target = new QueryRunnerFactory(context, node, null);
         List<QueryRunner> actual = target.getQueryRunners(domain, "testField", QueryRunner.QueryType.FG);
 
+        Assert.assertEquals(4, actual.size());
+
         Assert.assertEquals("test:testField:\"v0\"",((Query)Deencapsulation.getField(actual.get(0), "query")).toString());
         Assert.assertEquals("test:testField:\"v1\"",((Query)Deencapsulation.getField(actual.get(1), "query")).toString());
         Assert.assertEquals("test:testField:\"v2\"",((Query)Deencapsulation.getField(actual.get(2), "query")).toString());
         Assert.assertEquals("test:testField:\"v3\"",((Query)Deencapsulation.getField(actual.get(3), "query")).toString());
+
+        Assert.assertEquals(QueryRunner.QueryType.FG, actual.get(0).type);
+        Assert.assertEquals(QueryRunner.QueryType.FG, actual.get(1).type);
+        Assert.assertEquals(QueryRunner.QueryType.FG, actual.get(2).type);
+        Assert.assertEquals(QueryRunner.QueryType.FG, actual.get(3).type);
+
+        Assert.assertEquals(0, actual.get(0).index);
+        Assert.assertEquals(1, actual.get(1).index);
+        Assert.assertEquals(2, actual.get(2).index);
+        Assert.assertEquals(3, actual.get(3).index);
     }
 
     @Test
@@ -89,6 +101,9 @@ public class QueryRunnerFactoryTest
         QueryRunnerFactory target = new QueryRunnerFactory(context, node, fallback);
         List<QueryRunner> actual = target.getQueryRunners(domain, "testField", QueryRunner.QueryType.FG);
 
+        Assert.assertEquals(1, actual.size());
         Assert.assertEquals("test:testField:\"v1\"",((Query)Deencapsulation.getField(actual.get(0), "query")).toString());
+        Assert.assertEquals(QueryRunner.QueryType.FG, actual.get(0).type);
+        Assert.assertEquals(1, actual.get(0).index);
     }
 }

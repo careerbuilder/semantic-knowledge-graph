@@ -42,5 +42,7 @@ public class QueryRunnerTest {
         target.call();
 
         Assert.assertEquals(1, target.result);
+        Assert.assertEquals(QueryRunner.QueryType.FG, target.type);
+        Assert.assertEquals(1, target.index);
     }
 }
