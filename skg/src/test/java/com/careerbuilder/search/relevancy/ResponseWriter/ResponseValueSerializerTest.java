@@ -37,7 +37,6 @@ public class ResponseValueSerializerTest {
 
         String json = gson.toJson(r1);
 
-        System.out.println(json);
         Assert.assertEquals("{\"name\":\"12 test1\",\"relatedness\":0.0,\"popularity\":0.0,\"foreground_popularity\":1.0,\"background_popularity\":0.0}",
                 json);
     }

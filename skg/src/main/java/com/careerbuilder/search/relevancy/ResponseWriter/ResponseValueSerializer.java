@@ -28,6 +28,4 @@ public class ResponseValueSerializer implements JsonSerializer<ResponseValue> {
         resp.add("compare", context.serialize(src.compare));
         return resp;
     }
-
-
 }
