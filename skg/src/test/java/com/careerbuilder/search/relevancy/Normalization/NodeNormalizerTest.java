@@ -129,6 +129,7 @@ public class NodeNormalizerTest {
         FacetFieldAdapter adapter = new FacetFieldAdapter("testField");
         FacetRunner runner = new FacetRunner(context, adapter, "testField", 0, 1);
         runner.buckets = new LinkedList<>();
+        runner.adapter = adapter;
         SimpleOrderedMap<Object> bucket1 = new SimpleOrderedMap<>();
         bucket1.add("val", "testValue1");
         bucket1.add("id", "1");
@@ -156,8 +157,8 @@ public class NodeNormalizerTest {
         expectedMaps.add(map1);
         expectedMaps.add(map2);
 
-        Deencapsulation.invoke(target, "populateNorms", adapter, runner, requestValue1, normalizedStrings, normalizedMaps);
-        Deencapsulation.invoke(target, "populateNorms", adapter, runner, requestValue2, normalizedStrings, normalizedMaps);
+        Deencapsulation.invoke(target, "populateNorms", runner, requestValue1, normalizedStrings, normalizedMaps);
+        Deencapsulation.invoke(target, "populateNorms", runner, requestValue2, normalizedStrings, normalizedMaps);
 
         Assert.assertEquals(2, normalizedStrings.size());
         Assert.assertEquals(2, normalizedMaps.size());
@@ -174,6 +175,7 @@ public class NodeNormalizerTest {
         FacetFieldAdapter adapter = new FacetFieldAdapter("testField");
         FacetRunner runner = new FacetRunner(context, adapter, "testField", 0, 1);
         runner.buckets = new LinkedList<>();
+        runner.adapter = adapter;
         SimpleOrderedMap<Object> bucket1 = new SimpleOrderedMap<>();
         bucket1.add("val", "testValue1");
         bucket1.add("id", "1");
@@ -202,8 +204,8 @@ public class NodeNormalizerTest {
         expectedMaps.add(map2);
 
 
-        Deencapsulation.invoke(target, "populateNorms", adapter, runner, requestValue1, normalizedStrings, normalizedMaps);
-        Deencapsulation.invoke(target, "populateNorms", adapter, runner, requestValue2, normalizedStrings, normalizedMaps);
+        Deencapsulation.invoke(target, "populateNorms", runner, requestValue1, normalizedStrings, normalizedMaps);
+        Deencapsulation.invoke(target, "populateNorms", runner, requestValue2, normalizedStrings, normalizedMaps);
 
         Assert.assertEquals(2, normalizedStrings.size());
         Assert.assertEquals(2, normalizedMaps.size());

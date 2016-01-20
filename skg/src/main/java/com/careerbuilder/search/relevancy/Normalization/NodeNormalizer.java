@@ -46,23 +46,24 @@ public class NodeNormalizer implements RecursionOp {
             LinkedList<SimpleOrderedMap<String>> normalizedMaps= new LinkedList<>();
             for(FacetRunner runner : runners)
             {
-                populateNorms(runner.adapter, runner, request.values[runner.index], normalizedStrings, normalizedMaps);
+                populateNorms(runner, request.values[runner.index], normalizedStrings, normalizedMaps);
             }
             request.normalizedValues = normalizedMaps;
             request.values = normalizedStrings.toArray(new String[normalizedStrings.size()]);
         }
     }
 
-    private void populateNorms(FacetFieldAdapter adapter,
-                                  FacetRunner runner,
-                                  String requestValue,
-                                  LinkedList<String> normalizedStrings,
-                                  LinkedList<SimpleOrderedMap<String>> normalizedMaps) {
-        for(int j = 0; j < runner.buckets.size(); ++j){
-            SimpleOrderedMap<String> facetResult = adapter.getMapValue(runner.buckets.get(j));
-            if(MapUtility.mapContainsValue(requestValue.toLowerCase(), facetResult)) {
-                normalizedStrings.add(adapter.getStringValue(runner.buckets.get(j)));
-                normalizedMaps.add(adapter.getMapValue(runner.buckets.get(j)));
+    private void populateNorms(FacetRunner runner,
+                               String requestValue,
+                               LinkedList<String> normalizedStrings,
+                               LinkedList<SimpleOrderedMap<String>> normalizedMaps) {
+        for(SimpleOrderedMap<Object> bucket : runner.buckets)
+        {
+            SimpleOrderedMap<String> facetResult = runner.adapter.getMapValue(bucket);
+            if(MapUtility.mapContainsValue(requestValue.toLowerCase(), facetResult))
+            {
+                normalizedStrings.add(runner.adapter.getStringValue(bucket));
+                normalizedMaps.add(runner.adapter.getMapValue(bucket));
                 return;
             }
         }
@@ -73,7 +74,8 @@ public class NodeNormalizer implements RecursionOp {
     private Map<String, List<FacetRunner>> buildRunners(NodeContext context, RequestNode [] requests) throws IOException
     {
         Map<String, List<FacetRunner>> runners = new TreeMap<>();
-        for(int i = 0; i < requests.length; ++i) {
+        for(int i = 0; i < requests.length; ++i)
+        {
              runners.put(requests[i].type, buildRequestRunners(context, requests[i]));
         }
         return runners;
@@ -82,10 +84,13 @@ public class NodeNormalizer implements RecursionOp {
     private List<FacetRunner> buildRequestRunners(NodeContext context, RequestNode request) throws IOException {
         List<FacetRunner> runners = new LinkedList<>();
         FacetFieldAdapter adapter = new FacetFieldAdapter(context, request.type);
-        if(request.values != null && adapter.hasExtension()) {
-            for (int k = 0; k < request.values.length; ++k) {
+        if(request.values != null && adapter.hasExtension())
+        {
+            for (int k = 0; k < request.values.length; ++k)
+            {
                 // load required docListAndSet once and only if necessary
-                if (context.queryDomainList == null) {
+                if (context.queryDomainList == null)
+                {
                     context.queryDomainList =
                             context.req.getSearcher().getDocListAndSet(new MatchAllDocsQuery(),
                                     context.queryDomain, Sort.INDEXORDER, 0, 0);
