@@ -1,6 +1,8 @@
 package com.careerbuilder.search.relevancy.runnable;
 
 import com.careerbuilder.search.relevancy.NodeContext;
+import com.careerbuilder.search.relevancy.generation.FacetFieldAdapter;
+import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.MapSolrParams;
 import org.apache.solr.common.params.SolrParams;
@@ -18,21 +20,25 @@ public class FacetRunner extends Waitable{
 
     private int limit;
     private String field;
+    public FacetFieldAdapter adapter;
     public List<SimpleOrderedMap<Object>> buckets;
+    public final int index;
     public String facetQuery;
     final NodeContext context;
     public static final String FIELD_FACET_NAME = "fieldFacet";
     public static final String QUERY_FACET_NAME = "queryFacet";
 
-    public FacetRunner(NodeContext context, String facetQuery, String field, int limit) {
-        this(context, field, limit);
+    public FacetRunner(NodeContext context, FacetFieldAdapter adapter, String facetQuery, String field, int index, int limit) {
+        this(context, adapter, field, index, limit);
         this.facetQuery = facetQuery;
     }
 
-    public FacetRunner(NodeContext context, String field, int limit) {
+    public FacetRunner(NodeContext context, FacetFieldAdapter adapter, String field, int index, int limit) {
         this.context = context;
         this.field = field;
         this.limit = limit;
+        this.adapter = adapter;
+        this.index = index;
     }
 
     public Waitable call()

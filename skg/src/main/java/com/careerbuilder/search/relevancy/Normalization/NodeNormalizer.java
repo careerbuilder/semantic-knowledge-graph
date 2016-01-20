@@ -16,6 +16,8 @@ import org.apache.solr.common.util.SimpleOrderedMap;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Future;
 
 public class NodeNormalizer implements RecursionOp {
@@ -23,31 +25,28 @@ public class NodeNormalizer implements RecursionOp {
     private static final int DEFAULT_NORM_LIMIT = 100;
 
     public ResponseNode [] transform(NodeContext context, RequestNode [] requests, ResponseNode [] responses) throws IOException {
-        FacetFieldAdapter [] adapters = buildAdapters(context, requests);
-        FacetRunner [] runners = buildRunners(context, requests, adapters);
-        List<Future<Waitable>> futures = ThreadPool.multiplex(runners);
+        Map<String, List<FacetRunner>> runners = buildRunners(context, requests);
+        List<Future<Waitable>> futures = ThreadPool.multiplex(runners.values().stream()
+                .flatMap(l->l.stream()).toArray(FacetRunner[]::new));
         ThreadPool.demultiplex(futures);
-        normalizeRequests(requests, adapters, runners);
+        normalizeRequests(requests, runners);
         return null;
     }
 
-    public void normalizeRequests(RequestNode[] requests, FacetFieldAdapter[] adapters, FacetRunner[] runners) {
-        int runnerStartIndex = 0;
+    public void normalizeRequests(RequestNode[] requests, Map<String, List<FacetRunner>> runners) {
         for(int i = 0; i < requests.length; ++i) {
-            int length = requests[i].values == null ? 0 : requests[i].values.length;
-            normalizeSingleRequest(requests[i], adapters[i], runners, runnerStartIndex);
-            runnerStartIndex += length;
+            normalizeSingleRequest(requests[i], runners.get(requests[i].type));
         }
     }
 
-    private void normalizeSingleRequest(RequestNode request, FacetFieldAdapter adapter, FacetRunner[] runners, int requestStartIndex) {
-        if(request.values != null && adapter.hasExtension())
+    private void normalizeSingleRequest(RequestNode request, List<FacetRunner> runners) {
+        if(runners.size() > 0 &&  request.values != null && runners.get(0).adapter.hasExtension())
         {
             LinkedList<String> normalizedStrings = new LinkedList<>();
             LinkedList<SimpleOrderedMap<String>> normalizedMaps= new LinkedList<>();
-            for(int k = 0; k < request.values.length; ++k)
+            for(FacetRunner runner : runners)
             {
-                populateNorms(adapter, runners[k + requestStartIndex], request.values[k], normalizedStrings, normalizedMaps);
+                populateNorms(runner.adapter, runner, request.values[runner.index], normalizedStrings, normalizedMaps);
             }
             request.normalizedValues = normalizedMaps;
             request.values = normalizedStrings.toArray(new String[normalizedStrings.size()]);
@@ -71,16 +70,18 @@ public class NodeNormalizer implements RecursionOp {
         normalizedMaps.add(null);
     }
 
-    private FacetRunner [] buildRunners(NodeContext context, RequestNode [] requests, FacetFieldAdapter [] adapters) throws IOException
+    private Map<String, List<FacetRunner>> buildRunners(NodeContext context, RequestNode [] requests) throws IOException
     {
-        LinkedList<FacetRunner> runners = new LinkedList<>();
+        Map<String, List<FacetRunner>> runners = new TreeMap<>();
         for(int i = 0; i < requests.length; ++i) {
-                buildRequestRunners(context, requests[i], adapters[i], runners);
-            }
-        return runners.toArray(new FacetRunner[runners.size()]);
+             runners.put(requests[i].type, buildRequestRunners(context, requests[i]));
+        }
+        return runners;
     }
 
-    private void buildRequestRunners(NodeContext context, RequestNode request, FacetFieldAdapter adapter, LinkedList<FacetRunner> runners) throws IOException {
+    private List<FacetRunner> buildRequestRunners(NodeContext context, RequestNode request) throws IOException {
+        List<FacetRunner> runners = new LinkedList<>();
+        FacetFieldAdapter adapter = new FacetFieldAdapter(context, request.type);
         if(request.values != null && adapter.hasExtension()) {
             for (int k = 0; k < request.values.length; ++k) {
                 // load required docListAndSet once and only if necessary
@@ -90,17 +91,10 @@ public class NodeNormalizer implements RecursionOp {
                                     context.queryDomain, Sort.INDEXORDER, 0, 0);
                 }
                 String facetQuery = buildFacetQuery(adapter.baseField, request.values[k].toLowerCase());
-                runners.add(new FacetRunner(context, facetQuery, adapter.field, DEFAULT_NORM_LIMIT));
+                runners.add(new FacetRunner(context, adapter, facetQuery, adapter.field, k, DEFAULT_NORM_LIMIT));
             }
         }
-    }
-
-    private FacetFieldAdapter[] buildAdapters(NodeContext context, RequestNode[] requests) {
-        FacetFieldAdapter [] adapters = new FacetFieldAdapter[requests.length];
-        for(int i = 0; i < requests.length; ++i){
-            adapters[i] = new FacetFieldAdapter(context, requests[i].type);
-        }
-        return adapters;
+        return runners;
     }
 
     private String buildFacetQuery(String field, String inputValue) {

@@ -22,6 +22,9 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @RunWith(JMockit.class)
 public class NodeNormalizerTest {
@@ -72,23 +75,6 @@ public class NodeNormalizerTest {
     }
 
     @Test
-    public void buildAdapters()
-    {
-        RequestNode [] requests = new RequestNode[1];
-        requests[0] = new RequestNode(null, "testField");
-        NodeNormalizer target = new NodeNormalizer();
-        new Expectations(){{
-            new FacetFieldAdapter(context, "testField");
-        }};
-
-        FacetFieldAdapter [] actual = Deencapsulation.invoke(target, "buildAdapters", context, requests);
-
-        Assert.assertEquals(1, actual.length);
-        Assert.assertNotEquals(null, actual[0]);
-    }
-
-
-    @Test
     public void buildRunners_noValues()
     {
         RequestNode [] requests = new RequestNode[1];
@@ -98,9 +84,9 @@ public class NodeNormalizerTest {
         requests[0] = new RequestNode(null, "testField");
         NodeNormalizer target = new NodeNormalizer();
 
-        FacetRunner [] runners = Deencapsulation.invoke(target, "buildRunners", context, requests, adapters);
+        Map<String, List<FacetRunner>> runners  = Deencapsulation.invoke(target, "buildRunners", context, requests);
 
-        Assert.assertEquals(0, runners.length);
+        Assert.assertEquals(0, runners.get("testField").size());
     }
 
     @Test
@@ -113,31 +99,27 @@ public class NodeNormalizerTest {
         requests[0].values = new String[] {"testValue"};
         NodeNormalizer target = new NodeNormalizer();
 
-        FacetRunner [] runners = Deencapsulation.invoke(target, "buildRunners", context, requests, adapters);
+        Map<String, List<FacetRunner>> runners  = Deencapsulation.invoke(target, "buildRunners", context, requests);
 
-        Assert.assertEquals(0, runners.length);
+        Assert.assertEquals(0, runners.get("testField").size());
     }
 
     @Test
-    public void buildRunners_Normalize() throws IOException
+    public void buildRunners_Normalize(@Mocked FacetFieldAdapter adapter) throws IOException
     {
         RequestNode [] requests = new RequestNode[1];
-        FacetFieldAdapter [] adapters = new FacetFieldAdapter[1];
-        adapters[0] = new FacetFieldAdapter("testField");
-        Deencapsulation.setField(adapters[0], "facetFieldExtension", ".cs");
+        Deencapsulation.setField(adapter, "facetFieldExtension", ".cs");
         requests[0] = new RequestNode(null, "testField");
         requests[0].values = new String[] {"testValue"};
         NodeNormalizer target = new NodeNormalizer();
 
-        new Expectations(target) {{
-            Deencapsulation.invoke(target, "buildFacetQuery", "testField", "testvalue"); returns("testFacetQuery");
-        }};
-        new Expectations(){{
-            new FacetRunner(context, "testFacetQuery", "testField", 100);
+        new Expectations() {{
+            new FacetFieldAdapter(context, "testField");
+            adapter.hasExtension(); returns(true);
+            new FacetRunner(context, adapter, "null:\"testvalue\"", null, 0, 100);
         }};
 
-        FacetRunner [] runners = Deencapsulation.invoke(target, "buildRunners", context, requests, adapters);
-        Assert.assertNotEquals(null, runners[0]);
+        Map<String, List<FacetRunner>> runners = Deencapsulation.invoke(target, "buildRunners", context, requests);
     }
 
     @Test
@@ -145,7 +127,7 @@ public class NodeNormalizerTest {
     {
         NodeNormalizer target = new NodeNormalizer();
         FacetFieldAdapter adapter = new FacetFieldAdapter("testField");
-        FacetRunner runner = new FacetRunner(context, "testField", 1);
+        FacetRunner runner = new FacetRunner(context, adapter, "testField", 0, 1);
         runner.buckets = new LinkedList<>();
         SimpleOrderedMap<Object> bucket1 = new SimpleOrderedMap<>();
         bucket1.add("val", "testValue1");
@@ -190,7 +172,7 @@ public class NodeNormalizerTest {
     {
         NodeNormalizer target = new NodeNormalizer();
         FacetFieldAdapter adapter = new FacetFieldAdapter("testField");
-        FacetRunner runner = new FacetRunner(context, "testField", 1);
+        FacetRunner runner = new FacetRunner(context, adapter, "testField", 0, 1);
         runner.buckets = new LinkedList<>();
         SimpleOrderedMap<Object> bucket1 = new SimpleOrderedMap<>();
         bucket1.add("val", "testValue1");
@@ -219,6 +201,7 @@ public class NodeNormalizerTest {
         expectedMaps.add(map1);
         expectedMaps.add(map2);
 
+
         Deencapsulation.invoke(target, "populateNorms", adapter, runner, requestValue1, normalizedStrings, normalizedMaps);
         Deencapsulation.invoke(target, "populateNorms", adapter, runner, requestValue2, normalizedStrings, normalizedMaps);
 
@@ -233,24 +216,26 @@ public class NodeNormalizerTest {
     @Test
     public void normalizeRequests() {
         RequestNode [] requests = new RequestNode[1];
-        requests[0] = new RequestNode();
+        requests[0] = new RequestNode(null, "testField");
         requests[0].values = new String[] {"testValue1"};
         NodeNormalizer target = new NodeNormalizer();
-        FacetFieldAdapter [] adapters = new FacetFieldAdapter[1];
-        adapters[0] = new FacetFieldAdapter("testField");
-        Deencapsulation.setField(adapters[0], "facetFieldExtension", ".cs");
-        FacetRunner [] runners = new FacetRunner[1];
-        runners[0] = new FacetRunner(context, "testField", 1);
-        runners[0].buckets = new LinkedList<>();
+        FacetFieldAdapter adapter = new FacetFieldAdapter("testField");
+        Deencapsulation.setField(adapter, "facetFieldExtension", ".cs");
+        Map<String, List<FacetRunner>> runners = new TreeMap<>();
+        List<FacetRunner> runnerList = new LinkedList<>();
+        runnerList.add(new FacetRunner(context, adapter, "testField", 0, 1));
+        runnerList.get(0).buckets = new LinkedList<>();
+        runnerList.get(0).adapter = adapter;
         SimpleOrderedMap<Object> bucket1 = new SimpleOrderedMap<>();
         bucket1.add("val", "testValue1");
         SimpleOrderedMap<Object> bucket2 = new SimpleOrderedMap<>();
         bucket2.add("val", "testValue2");
         SimpleOrderedMap<Object> bucket3 = new SimpleOrderedMap<>();
         bucket3.add("val", "value3");
-        runners[0].buckets.add(bucket1);
-        runners[0].buckets.add(bucket2);
-        runners[0].buckets.add(bucket3);
+        runnerList.get(0).buckets.add(bucket1);
+        runnerList.get(0).buckets.add(bucket2);
+        runnerList.get(0).buckets.add(bucket3);
+        runners.put("testField", runnerList);
         String [] expectedStrings = new String [] {"testValue1"};
         LinkedList<SimpleOrderedMap<String>> expectedMaps = new LinkedList<>();
         SimpleOrderedMap<String> map1 = new SimpleOrderedMap<>();
@@ -262,7 +247,7 @@ public class NodeNormalizerTest {
         expectedMaps.add(map1);
         expectedMaps.add(map2);
 
-        target.normalizeRequests(requests, adapters, runners);
+        target.normalizeRequests(requests, runners);
 
         Assert.assertEquals(1, requests[0].values.length);
         Assert.assertEquals(1, requests[0].normalizedValues.size());
@@ -270,8 +255,5 @@ public class NodeNormalizerTest {
             Assert.assertEquals(expectedMaps.get(i),requests[0].normalizedValues.get(i));
             Assert.assertEquals(expectedStrings[i],requests[0].values[i]);
         }
-
     }
-
-
 }

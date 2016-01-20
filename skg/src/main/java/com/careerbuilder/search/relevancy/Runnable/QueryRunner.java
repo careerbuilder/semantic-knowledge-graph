@@ -9,7 +9,7 @@ public class QueryRunner extends Waitable {
     public enum QueryType {Q, FG, BG};
     public QueryType type;
     public int result = 0;
-    public int index = 0;
+    public final int index;
 
     protected Query query;
     SolrIndexSearcher searcher;

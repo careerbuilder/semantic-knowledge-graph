@@ -29,7 +29,7 @@ public class NodeGeneratorTest {
 
     ResponseNode response;
     RequestNode request;
-    @Mocked FacetRunner runner;
+    FacetRunner runner;
     @Cascading final NodeContext context = new NodeContext(new RelatednessRequest());
     @Mocked SolrQueryRequest unused;
     @Mocked SolrIndexSearcher unusedSearcher;
@@ -37,7 +37,6 @@ public class NodeGeneratorTest {
 
     @Before
     public void init() {
-        runner.buckets= new LinkedList<>();
 
         request = new RequestNode(null, "testType");
         request.values = new String[] {"passedInValue1", "passedInValue2"};
@@ -71,6 +70,8 @@ public class NodeGeneratorTest {
         }};
 
         adapter = new FacetFieldAdapter(null, "testField");
+        Deencapsulation.setField(adapter, "facetFieldValueDelimiter", "^");
+        runner = new FacetRunner(null, adapter, null, "testField",0, 0);
     }
 
     @Test
@@ -81,7 +82,7 @@ public class NodeGeneratorTest {
         requests[0] = new RequestNode(null, "testField");
 
         NodeGenerator target = new NodeGenerator();
-        FacetRunner [] runners = Deencapsulation.invoke(target, "buildRunners", context, requests, adapters);
+        FacetRunner [] runners = Deencapsulation.invoke(target, "buildRunners", context, requests);
 
         Assert.assertEquals(null, runners[0]);
     }
@@ -90,18 +91,17 @@ public class NodeGeneratorTest {
     public void buildRunners_discover()
     {
         RequestNode [] requests = new RequestNode[1];
-        FacetFieldAdapter [] adapters = new FacetFieldAdapter[1];
         requests[0] = new RequestNode(null, "testField");
         requests[0].limit = 10;
         requests[0].discover_values = true;
 
         new Expectations() {{
-            new FacetRunner(context, null, 10);
+            new FacetRunner(context, (FacetFieldAdapter)any, null, 0, 10);
         }};
 
         NodeGenerator target = new NodeGenerator();
-        Deencapsulation.invoke(target, "buildRunners", context, requests, adapters);
-        Assert.assertNotEquals(null, adapters[0]);
+        FacetRunner [] actual = Deencapsulation.invoke(target, "buildRunners", context, requests);
+        Assert.assertNotEquals(null, actual[0]);
     }
 
 
@@ -158,10 +158,10 @@ public class NodeGeneratorTest {
         NodeGenerator target = new NodeGenerator();
         new Expectations(target){{
             Deencapsulation.invoke(target, "addPassedInValues", request, response); returns(1);
-            Deencapsulation.invoke(target, "addGeneratedValues", response, runner, adapter, 1);
+            Deencapsulation.invoke(target, "addGeneratedValues", response, runner, 1);
         }};
 
-        Deencapsulation.invoke(target, "mergeResponseValues", request, response, runner, adapter);
+        Deencapsulation.invoke(target, "mergeResponseValues", request, response, runner);
     }
 
     @Test
@@ -169,8 +169,7 @@ public class NodeGeneratorTest {
     {
         ResponseNode response = new ResponseNode("testField");
         response.values = new ResponseValue[2];
-        FacetRunner runner = new FacetRunner(null, null, "testField", 0);
-        FacetFieldAdapter adapter = new FacetFieldAdapter(null, "testField");
+
         runner.buckets = new LinkedList<>();
         SimpleOrderedMap<Object> generatedValue1 = new SimpleOrderedMap<>();
         generatedValue1.add("val", "generatedValue1");
@@ -187,7 +186,7 @@ public class NodeGeneratorTest {
         expecteds[1].normalizedValue.add("name", "generatedValue2");
 
         NodeGenerator target = new NodeGenerator();
-        Deencapsulation.invoke(target, "addGeneratedValues", response, runner, adapter, 0);
+        Deencapsulation.invoke(target, "addGeneratedValues", response, runner, 0);
 
         Assert.assertEquals(2, response.values.length);
         for(int i = 0; i < expecteds.length; ++i) {
