@@ -1,6 +1,6 @@
-package com.careerbuilder.search.relevancy.ResponseWriter;
+package com.careerbuilder.search.relevancy.responsewriter;
 
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
+import com.careerbuilder.search.relevancy.model.ResponseValue;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
@@ -28,6 +28,4 @@ public class ResponseValueSerializer implements JsonSerializer<ResponseValue> {
         resp.add("compare", context.serialize(src.compare));
         return resp;
     }
-
-
 }

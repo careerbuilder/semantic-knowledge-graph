@@ -1,7 +1,7 @@
 package com.careerbuilder.search.relevancy.utility;
 
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
-import com.careerbuilder.search.relevancy.Models.SortType;
+import com.careerbuilder.search.relevancy.model.ResponseValue;
+import com.careerbuilder.search.relevancy.model.SortType;
 
 import java.util.Collections;
 import java.util.Comparator;

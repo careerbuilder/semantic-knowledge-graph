@@ -1,6 +1,8 @@
-package com.careerbuilder.search.relevancy.Runnable;
+package com.careerbuilder.search.relevancy.runnable;
 
 import com.careerbuilder.search.relevancy.NodeContext;
+import com.careerbuilder.search.relevancy.generation.FacetFieldAdapter;
+import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.MapSolrParams;
 import org.apache.solr.common.params.SolrParams;
@@ -16,24 +18,27 @@ import java.util.*;
 
 public class FacetRunner extends Waitable{
 
-
     private int limit;
     private String field;
+    public FacetFieldAdapter adapter;
     public List<SimpleOrderedMap<Object>> buckets;
+    public final int index;
     public String facetQuery;
     final NodeContext context;
     public static final String FIELD_FACET_NAME = "fieldFacet";
     public static final String QUERY_FACET_NAME = "queryFacet";
 
-    public FacetRunner(NodeContext context, String facetQuery, String field, int limit) {
-        this(context, field, limit);
+    public FacetRunner(NodeContext context, FacetFieldAdapter adapter, String facetQuery, String field, int index, int limit) {
+        this(context, adapter, field, index, limit);
         this.facetQuery = facetQuery;
     }
 
-    public FacetRunner(NodeContext context, String field, int limit) {
+    public FacetRunner(NodeContext context, FacetFieldAdapter adapter, String field, int index, int limit) {
         this.context = context;
         this.field = field;
         this.limit = limit;
+        this.adapter = adapter;
+        this.index = index;
     }
 
     public Waitable call()
@@ -61,8 +66,8 @@ public class FacetRunner extends Waitable{
         return rb;
     }
 
-    // this is kind of awkward, but necessary since JsON faceting is protected in Solr,
-    // (we can only interact with it by mocking up a request and parsing a response).
+    // this is kind of awkward, but necessary since JSON faceting is protected in Solr,
+    // (we can only interact with through a Map request).
     private void parseResponse(SolrQueryResponse resp) {
         SimpleOrderedMap<Object> facet = (SimpleOrderedMap<Object>)
                 ((SimpleOrderedMap<Object>)((SimpleOrderedMap<Object>) resp.getValues()).get("facets")).get(QUERY_FACET_NAME);
@@ -112,5 +117,4 @@ public class FacetRunner extends Waitable{
         paramMap.put(FacetParams.FACET, "true");
         return new MapSolrParams(paramMap);
     }
-
 }

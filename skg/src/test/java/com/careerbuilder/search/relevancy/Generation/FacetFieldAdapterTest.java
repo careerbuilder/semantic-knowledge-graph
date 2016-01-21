@@ -1,7 +1,7 @@
-package com.careerbuilder.search.relevancy.Generation;
+package com.careerbuilder.search.relevancy.generation;
 
 import com.careerbuilder.search.relevancy.FieldChecker;
-import com.careerbuilder.search.relevancy.Models.ParameterSet;
+import com.careerbuilder.search.relevancy.model.ParameterSet;
 import com.careerbuilder.search.relevancy.NodeContext;
 import mockit.Mock;
 import mockit.MockUp;
@@ -106,9 +106,8 @@ public class FacetFieldAdapterTest {
         NodeContext context = new NodeContext(new ParameterSet(null, null, invariants));
         FacetFieldAdapter target = new FacetFieldAdapter(context, "carotene.v1");
 
-        String actual1 = target.field;
-        Assert.assertEquals("carotene.v1.id-title.cs".compareTo(actual1), 0);
-
+        String actual = target.field;
+        Assert.assertEquals("carotene.v1.id-title.cs", actual);
     }
 
     @Test
@@ -117,8 +116,8 @@ public class FacetFieldAdapterTest {
         NodeContext context = new NodeContext(new ParameterSet(null, null, invariants));
         FacetFieldAdapter target = new FacetFieldAdapter(context, "carotene.v1.top");
 
-        String actual2 = target.field;
-        Assert.assertEquals("carotene.v1.top.id-title.cs".compareTo(actual2), 0);
+        String actual = target.field;
+        Assert.assertEquals("carotene.v1.top.id-title.cs", actual);
     }
 
     @Test
@@ -127,8 +126,8 @@ public class FacetFieldAdapterTest {
         NodeContext context = new NodeContext(new ParameterSet(null,null,invariants));
         FacetFieldAdapter target = new FacetFieldAdapter(context, "joblevel.v1");
 
-        String actual1 = target.field;
-        Assert.assertEquals("joblevel.v1.level-description.cs".compareTo(actual1), 0);
+        String actual = target.field;
+        Assert.assertEquals("joblevel.v1.level-description.cs", actual);
     }
 
 

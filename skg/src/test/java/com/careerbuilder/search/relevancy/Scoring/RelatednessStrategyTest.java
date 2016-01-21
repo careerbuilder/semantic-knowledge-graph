@@ -1,4 +1,4 @@
-package com.careerbuilder.search.relevancy.Scoring;
+package com.careerbuilder.search.relevancy.scoring;
 
 import org.junit.Assert;
 import org.junit.Before;

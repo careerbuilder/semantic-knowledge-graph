@@ -1,11 +1,11 @@
-package com.careerbuilder.search.relevancy.Scoring;
+package com.careerbuilder.search.relevancy.scoring;
 
-import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
-import com.careerbuilder.search.relevancy.Models.RequestNode;
-import com.careerbuilder.search.relevancy.Models.ResponseNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
+import com.careerbuilder.search.relevancy.model.RelatednessRequest;
+import com.careerbuilder.search.relevancy.model.RequestNode;
+import com.careerbuilder.search.relevancy.model.ResponseNode;
+import com.careerbuilder.search.relevancy.model.ResponseValue;
 import com.careerbuilder.search.relevancy.NodeContext;
-import com.careerbuilder.search.relevancy.Runnable.QueryRunner;
+import com.careerbuilder.search.relevancy.runnable.QueryRunner;
 import mockit.Deencapsulation;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
@@ -17,6 +17,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 @RunWith(JMockit.class)
 public class NodeScorerTest {
@@ -28,6 +31,7 @@ public class NodeScorerTest {
     ResponseNode pResponse = new ResponseNode();
     RequestNode request = new RequestNode();
     NodeContext context = new NodeContext(new RelatednessRequest());
+    List<QueryRunner> runners = new LinkedList<>();
     @Mocked DocSet fgDomain;
     @Mocked DocSet bgDomain;
     @Mocked ScoreNormalizer normalizer;
@@ -36,12 +40,12 @@ public class NodeScorerTest {
     public void init() {
         response.type = "keywords.v1";
         response.values = new ResponseValue[0];
-        fgRunners[0] = new QueryRunner(null, null, null);
-        fgRunners[1] = new QueryRunner(null, null, null);
-        bgRunners[0] = new QueryRunner(null, null, null);
-        bgRunners[1] = new QueryRunner(null, null, null);
-        qRunners[0] = new QueryRunner(null, null, null);
-        qRunners[1] = new QueryRunner(null, null, null);
+        fgRunners[0] = new QueryRunner(null, null, null, QueryRunner.QueryType.FG, 0);
+        fgRunners[1] = new QueryRunner(null, null, null, QueryRunner.QueryType.FG, 1);
+        bgRunners[0] = new QueryRunner(null, null, null, QueryRunner.QueryType.BG, 0);
+        bgRunners[1] = new QueryRunner(null, null, null, QueryRunner.QueryType.BG, 1);
+        qRunners[0] = new QueryRunner(null, null, null, QueryRunner.QueryType.Q, 0);
+        qRunners[1] = new QueryRunner(null, null, null, QueryRunner.QueryType.Q, 1);
         fgRunners[0].result = 0;
         fgRunners[1].result = 1;
         bgRunners[0].result = 0;
@@ -50,6 +54,9 @@ public class NodeScorerTest {
         qRunners[1].result = 1;
 
         request.limit = 2;
+
+        runners.addAll(Arrays.asList(fgRunners));
+        runners.addAll(Arrays.asList(bgRunners));
 
         context.bgDomain = bgDomain;
         context.fgDomain = fgDomain;
@@ -69,7 +76,7 @@ public class NodeScorerTest {
         response.values[0] = new ResponseValue("test");
         response.values[1] = new ResponseValue("test");
         NodeScorer target = new NodeScorer();
-        Deencapsulation.invoke(target, "addQueryResults", response, fgRunners, bgRunners, qRunners);
+        Deencapsulation.invoke(target, "addQueryResults", response, runners);
 
         Assert.assertEquals(0, response.values[0].foreground_popularity, 1e-4);
         Assert.assertEquals(0, response.values[0].background_popularity, 1e-4);

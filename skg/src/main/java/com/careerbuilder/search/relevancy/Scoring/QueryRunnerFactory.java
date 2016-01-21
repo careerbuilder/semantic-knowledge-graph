@@ -1,17 +1,15 @@
-package com.careerbuilder.search.relevancy.Scoring;
+package com.careerbuilder.search.relevancy.scoring;
 
-import com.careerbuilder.search.relevancy.Models.ResponseNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
+import com.careerbuilder.search.relevancy.model.ResponseNode;
 import com.careerbuilder.search.relevancy.NodeContext;
-import com.careerbuilder.search.relevancy.Runnable.QueryRunner;
+import com.careerbuilder.search.relevancy.runnable.QueryRunner;
 import com.careerbuilder.search.relevancy.utility.ParseUtility;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
 import org.apache.solr.search.DocSet;
-import org.apache.solr.search.SolrIndexSearcher;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 public class QueryRunnerFactory
 {
@@ -26,16 +24,32 @@ public class QueryRunnerFactory
         this.fallbackIndices = fallbackIndices;
     }
 
-    protected QueryRunner[] getQueryRunners(DocSet domain, String field) {
-        QueryRunner [] runners = new QueryRunner[response.values.length];
-        for(int k = 0; k < response.values.length; ++k) {
-            if(fallbackIndices == null || fallbackIndices.contains(k)) {
-                Query query = ParseUtility.parseQueryString(field
-                                + ":\"" + response.values[k].value.toLowerCase().trim() + "\"",
-                        context.req);
-                runners[k] = new QueryRunner(context.req.getSearcher(), query, domain);
+    protected List<QueryRunner> getQueryRunners(DocSet domain, String field, QueryRunner.QueryType type) {
+        List<QueryRunner> runners = new LinkedList<>();
+        if(fallbackIndices == null)
+        {
+            for (int k = 0; k < response.values.length; ++k)
+            {
+                runners.add(buildRunner(domain, type,
+                        field, response.values[k].value.toLowerCase().trim(), k));
+            }
+        }
+        else
+        {
+            for (Integer k : fallbackIndices)
+            {
+                runners.add(buildRunner(domain, type,
+                        field, response.values[k].value.toLowerCase().trim(), k));
             }
         }
         return runners;
+    }
+
+    private QueryRunner buildRunner(DocSet domain, QueryRunner.QueryType type, String field, String value, int index)
+    {
+        Query query = ParseUtility.parseQueryString(
+                field + ":\"" + value  + "\"",
+                context.req);
+        return new QueryRunner(context.req.getSearcher(), query, domain, type, index);
     }
 }

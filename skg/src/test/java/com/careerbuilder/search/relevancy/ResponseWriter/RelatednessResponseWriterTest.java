@@ -1,8 +1,8 @@
-package com.careerbuilder.search.relevancy.ResponseWriter;
+package com.careerbuilder.search.relevancy.responsewriter;
 
-import com.careerbuilder.search.relevancy.Models.RelatednessResponse;
-import com.careerbuilder.search.relevancy.Models.ResponseNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
+import com.careerbuilder.search.relevancy.model.RelatednessResponse;
+import com.careerbuilder.search.relevancy.model.ResponseNode;
+import com.careerbuilder.search.relevancy.model.ResponseValue;
 import mockit.Mock;
 import mockit.MockUp;
 import mockit.integration.junit4.JMockit;

@@ -1,7 +1,7 @@
-package com.careerbuilder.search.relevancy.ResponseWriter;
+package com.careerbuilder.search.relevancy.responsewriter;
 
-import com.careerbuilder.search.relevancy.Models.*;
-import com.careerbuilder.search.relevancy.Models.Error;
+import com.careerbuilder.search.relevancy.model.*;
+import com.careerbuilder.search.relevancy.model.Error;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.solr.common.util.NamedList;

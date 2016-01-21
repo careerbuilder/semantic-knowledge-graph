@@ -1,8 +1,8 @@
 package com.careerbuilder.search.relevancy;
 
-import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
-import com.careerbuilder.search.relevancy.Models.RequestNode;
-import com.careerbuilder.search.relevancy.Models.ResponseNode;
+import com.careerbuilder.search.relevancy.model.RelatednessRequest;
+import com.careerbuilder.search.relevancy.model.RequestNode;
+import com.careerbuilder.search.relevancy.model.ResponseNode;
 import com.careerbuilder.search.relevancy.utility.ParseUtility;
 import mockit.Mock;
 import mockit.MockUp;

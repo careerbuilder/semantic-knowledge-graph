@@ -1,4 +1,4 @@
-package com.careerbuilder.search.relevancy.Runnable;
+package com.careerbuilder.search.relevancy.runnable;
 
 import org.apache.commons.lang.NotImplementedException;
 

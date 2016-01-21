@@ -1,11 +1,8 @@
 package com.careerbuilder.search.relevancy.utility;
 
-import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
-import com.careerbuilder.search.relevancy.Models.ResponseNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
-import com.careerbuilder.search.relevancy.Models.SortType;
-import com.careerbuilder.search.relevancy.utility.ResponseUtility;
-import com.careerbuilder.search.relevancy.utility.SortUtility;
+import com.careerbuilder.search.relevancy.model.ResponseNode;
+import com.careerbuilder.search.relevancy.model.ResponseValue;
+import com.careerbuilder.search.relevancy.model.SortType;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

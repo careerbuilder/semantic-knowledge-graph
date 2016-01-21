@@ -1,27 +1,20 @@
-package com.careerbuilder.search.relevancy.Scoring;
+package com.careerbuilder.search.relevancy.scoring;
 
-import com.careerbuilder.search.relevancy.Models.RelatednessRequest;
-import com.careerbuilder.search.relevancy.Models.ResponseNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
+import com.careerbuilder.search.relevancy.model.RelatednessRequest;
+import com.careerbuilder.search.relevancy.model.ResponseNode;
+import com.careerbuilder.search.relevancy.model.ResponseValue;
 import com.careerbuilder.search.relevancy.NodeContext;
-import com.careerbuilder.search.relevancy.Runnable.QueryRunner;
+import com.careerbuilder.search.relevancy.runnable.QueryRunner;
 import com.careerbuilder.search.relevancy.utility.ParseUtility;
 import mockit.*;
 import mockit.integration.junit4.JMockit;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TermQuery;
 import org.apache.solr.common.params.SolrParams;
-import org.apache.solr.common.util.ContentStream;
-import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.schema.IndexSchema;
-import org.apache.solr.search.DocListAndSet;
 import org.apache.solr.search.DocSet;
-import org.apache.solr.search.QParser;
 import org.apache.solr.search.SolrIndexSearcher;
-import org.apache.solr.util.RTimer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +22,7 @@ import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 
 @RunWith(JMockit.class)
 public class QueryRunnerFactoryTest
@@ -80,12 +73,24 @@ public class QueryRunnerFactoryTest
     public void getQueryRunners() throws IOException
     {
         QueryRunnerFactory target = new QueryRunnerFactory(context, node, null);
-        QueryRunner[] actual = target.getQueryRunners(domain, "testField");
+        List<QueryRunner> actual = target.getQueryRunners(domain, "testField", QueryRunner.QueryType.FG);
 
-        Assert.assertEquals("test:testField:\"v0\"",((Query)Deencapsulation.getField(actual[0], "query")).toString());
-        Assert.assertEquals("test:testField:\"v1\"",((Query)Deencapsulation.getField(actual[1], "query")).toString());
-        Assert.assertEquals("test:testField:\"v2\"",((Query)Deencapsulation.getField(actual[2], "query")).toString());
-        Assert.assertEquals("test:testField:\"v3\"",((Query)Deencapsulation.getField(actual[3], "query")).toString());
+        Assert.assertEquals(4, actual.size());
+
+        Assert.assertEquals("test:testField:\"v0\"",((Query)Deencapsulation.getField(actual.get(0), "query")).toString());
+        Assert.assertEquals("test:testField:\"v1\"",((Query)Deencapsulation.getField(actual.get(1), "query")).toString());
+        Assert.assertEquals("test:testField:\"v2\"",((Query)Deencapsulation.getField(actual.get(2), "query")).toString());
+        Assert.assertEquals("test:testField:\"v3\"",((Query)Deencapsulation.getField(actual.get(3), "query")).toString());
+
+        Assert.assertEquals(QueryRunner.QueryType.FG, actual.get(0).type);
+        Assert.assertEquals(QueryRunner.QueryType.FG, actual.get(1).type);
+        Assert.assertEquals(QueryRunner.QueryType.FG, actual.get(2).type);
+        Assert.assertEquals(QueryRunner.QueryType.FG, actual.get(3).type);
+
+        Assert.assertEquals(0, actual.get(0).index);
+        Assert.assertEquals(1, actual.get(1).index);
+        Assert.assertEquals(2, actual.get(2).index);
+        Assert.assertEquals(3, actual.get(3).index);
     }
 
     @Test
@@ -94,11 +99,11 @@ public class QueryRunnerFactoryTest
         HashSet<Integer> fallback = new HashSet<>();
         fallback.add(1);
         QueryRunnerFactory target = new QueryRunnerFactory(context, node, fallback);
-        QueryRunner[] actual = target.getQueryRunners(domain, "testField");
+        List<QueryRunner> actual = target.getQueryRunners(domain, "testField", QueryRunner.QueryType.FG);
 
-        Assert.assertEquals(null, actual[0]);
-        Assert.assertEquals("test:testField:\"v1\"",((Query)Deencapsulation.getField(actual[1], "query")).toString());
-        Assert.assertEquals(null, actual[2]);
-        Assert.assertEquals(null, actual[3]);
+        Assert.assertEquals(1, actual.size());
+        Assert.assertEquals("test:testField:\"v1\"",((Query)Deencapsulation.getField(actual.get(0), "query")).toString());
+        Assert.assertEquals(QueryRunner.QueryType.FG, actual.get(0).type);
+        Assert.assertEquals(1, actual.get(0).index);
     }
 }

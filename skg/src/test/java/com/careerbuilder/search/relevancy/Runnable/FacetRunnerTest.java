@@ -1,8 +1,8 @@
-package com.careerbuilder.search.relevancy.Runnable;
+package com.careerbuilder.search.relevancy.runnable;
 
-import com.careerbuilder.search.relevancy.Generation.FacetFieldAdapter;
-import com.careerbuilder.search.relevancy.Models.RequestNode;
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
+import com.careerbuilder.search.relevancy.generation.FacetFieldAdapter;
+import com.careerbuilder.search.relevancy.model.RequestNode;
+import com.careerbuilder.search.relevancy.model.ResponseValue;
 import com.careerbuilder.search.relevancy.NodeContext;
 import com.google.gson.Gson;
 import mockit.*;
@@ -29,6 +29,8 @@ public class FacetRunnerTest {
     RequestNode request;
     String field;
     Gson gson;
+    @Mocked
+    FacetFieldAdapter adapter;
 
     @Before
     public void init()
@@ -73,7 +75,7 @@ public class FacetRunnerTest {
         expected.add(new ResponseValue("testValue2", 4321));
 
 
-        FacetRunner target = new FacetRunner(context, "query", "testfield", 0);
+        FacetRunner target = new FacetRunner(context, adapter, "query", "testfield", 0,  0);
 
         Deencapsulation.invoke(target, "parseResponse", resp);
 
@@ -86,7 +88,7 @@ public class FacetRunnerTest {
 
     @Test
     public void buildFacetParams(){
-        FacetRunner target = new FacetRunner(context, "query", "testField", 0);
+        FacetRunner target = new FacetRunner(context, adapter, "query", "testField",0, 0);
 
         MapSolrParams actual = Deencapsulation.invoke(target, "buildFacetParams");
 
@@ -97,7 +99,7 @@ public class FacetRunnerTest {
 
     @Test
     public void buildFacetJson(){
-        FacetRunner target = new FacetRunner(context, "query", "testfield", 0);
+        FacetRunner target = new FacetRunner(context, adapter, "query", "testfield", 0, 0);
         int limit = Math.max(request.limit, 25)*5;
         String expected = "{\"facet\":{\"queryFacet\":{\"query\":{\"facet\":{\"fieldFacet\":{\"field\":" +
                 "{\"type\":\"field\",\"field\":\"testfield\",\"limit\":"+limit+"}}},\"q\":\"query\"}}}}";

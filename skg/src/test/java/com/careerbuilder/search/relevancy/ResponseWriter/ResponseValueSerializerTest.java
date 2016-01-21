@@ -1,6 +1,6 @@
-package com.careerbuilder.search.relevancy.ResponseWriter;
+package com.careerbuilder.search.relevancy.responsewriter;
 
-import com.careerbuilder.search.relevancy.Models.ResponseValue;
+import com.careerbuilder.search.relevancy.model.ResponseValue;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import mockit.integration.junit4.JMockit;
@@ -37,7 +37,6 @@ public class ResponseValueSerializerTest {
 
         String json = gson.toJson(r1);
 
-        System.out.println(json);
         Assert.assertEquals("{\"name\":\"12 test1\",\"relatedness\":0.0,\"popularity\":0.0,\"foreground_popularity\":1.0,\"background_popularity\":0.0}",
                 json);
     }
