@@ -1,0 +1,39 @@
+From faab4251e164057acec0b7c7e457490a084edec7 Mon Sep 17 00:00:00 2001
+From: andhesmi <andries.smith@careerbuilder.com>
+Date: Wed, 6 Jan 2016 16:25:06 -0500
+Subject: [PATCH] fixing Facet Field leak and setting custom jetty.xml
+
+---
+ solr/core/src/java/org/apache/solr/search/facet/FacetField.java | 2 +-
+ solr/server/etc/jetty.xml                                       | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/solr/core/src/java/org/apache/solr/search/facet/FacetField.java b/solr/core/src/java/org/apache/solr/search/facet/FacetField.java
+index 7c13f77..6be438f 100644
+--- a/solr/core/src/java/org/apache/solr/search/facet/FacetField.java
++++ b/solr/core/src/java/org/apache/solr/search/facet/FacetField.java
+@@ -341,7 +341,7 @@ abstract class FacetFieldProcessorFCBase extends FacetFieldProcessor {
+       // handle sub-facets for this bucket
+       if (freq.getSubFacets().size() > 0) {
+         FacetContext subContext = fcontext.sub();
+-        subContext.base = fcontext.searcher.getDocSet(new TermQuery(new Term(sf.getName(), br.clone())), fcontext.base);
++        subContext.base = fcontext.searcher.getDocSet(new TermQuery(new Term(sf.getName(), BytesRef.deepCopyOf(br))), fcontext.base);
+         try {
+           fillBucketSubs(bucket, subContext);
+         } finally {
+diff --git a/solr/server/etc/jetty.xml b/solr/server/etc/jetty.xml
+index 3b1abee..20596f1 100644
+--- a/solr/server/etc/jetty.xml
++++ b/solr/server/etc/jetty.xml
+@@ -19,7 +19,7 @@
+       <!-- Default queued blocking threadpool -->
+       <New class="org.eclipse.jetty.util.thread.QueuedThreadPool">
+         <Set name="minThreads">10</Set>
+-        <Set name="maxThreads">10000</Set>
++        <Set name="maxThreads">100</Set>
+         <Set name="detailedDump">false</Set>
+       </New>
+     </Set>
+-- 
+2.4.9 (Apple Git-60)
+

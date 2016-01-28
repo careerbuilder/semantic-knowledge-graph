@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="cb-semantic-search-parser" default="" basedir="./">
+    <property name="deploy.dir" value="deploy" />
+    <property name="version.solr" value="lucene_solr_5_1_0" />
+    <property name="git.solr" value="https://github.com/apache/lucene-solr" />
+    <property name="local.dir.solr" value="lucene-solr" />
+    <property name="local.dir.patches" value="patches" />
+    <!-- Will likely need to fork SolrTextTagger in future and modify below -->
+    <property name="local.dir.skg" value="skg" />
+
+    <!-- Make Maven Usable -->
+    <property name="maven.executable" value="mvn" />
+    
+    <!-- Make Git Usable -->
+    <macrodef name = "git">
+        <attribute name = "command" />
+        <attribute name = "dir" default = "" />
+        <element name = "args" optional = "true" />
+        <sequential>
+            <echo message = "git @{command}" />
+            <exec executable = "git" dir = "@{dir}">
+                <arg value = "@{command}" />
+                <args/>
+            </exec>
+        </sequential>
+    </macrodef>
+ 
+
+    <target name="clean" description="Delete old deploy files.">
+        <echo message="Deleting old deploy files..."/>
+        <!-- cb semantic search parser -->
+        <delete includeEmptyDirs="true" failonerror="false">
+            <fileset dir="${deploy.dir}">
+                <include name="**" />
+            </fileset>
+        </delete>
+        
+        <!-- Clean Solr -->
+        <ant antfile="build.xml" dir="${basedir}/${local.dir.solr}/solr" target="clean" />
+    </target>
+
+    <target name="pull">
+        <!-- Pull Solr -->
+        <git command = "clone">
+            <args>
+                <arg value = "${git.solr}" />
+                <arg value = "${local.dir.solr}" />
+            </args>
+        </git>
+        <git command = "checkout" dir = "${local.dir.solr}">
+            <args>
+                <arg value = "${version.solr}" />
+            </args>
+        </git>
+    </target>
+
+    <target name="patch" depends="pull">
+        <!-- Apply Solr Patch -->
+        <git command = "apply">
+            <args>
+                <arg value = "${local.dir.patches}/lucene_solr_5_1_0.patch"/>
+                <arg value = "--directory=${local.dir.solr}"/>
+            </args>
+		</git>
+    </target>
+
+    <target name="build" depends="patch" description="Builds all dependencies">
+        <ant antfile="build.xml" dir="${basedir}/${local.dir.solr}/solr" target="example" />
+        <exec executable="${maven.executable}" dir="${basedir}/${local.dir.skg}">
+            <arg value="package" />
+        </exec>
+    </target>
+
+    <target name="package-nobuild" description="Bundles up pre-built artifacts into a distribution">
+        <echo message="Creating required directories..."/>
+        <mkdir dir="${deploy.dir}"/>
+
+        <echo message="Packaging up Solr..."/>
+		<copy todir="${deploy.dir}/solr">
+            <fileset dir="${basedir}/lucene-solr/solr/">
+                <include name="server/**"/>
+            </fileset>
+		</copy>
+
+		<copy todir="${deploy.dir}/solr">
+            <fileset dir="${basedir}/lucene-solr/solr/">
+                <include name="bin/solr"/>
+            </fileset>
+		</copy>
+
+		<copy todir="${deploy.dir}/solr/server">
+            <fileset dir="${basedir}/configs/" includes="solr/**" />
+        </copy>
+
+        <echo message="Integrating skg..."/>
+        <copy todir="${deploy.dir}/solr/server/lib">
+            <fileset dir="${basedir}/skg/target">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+
+        <echo message="Integrating Startup Script"/>
+        <copy todir="${deploy.dir}">
+            <fileset dir="${basedir}/configs">
+                <include name="*.sh"/>
+            </fileset>
+        </copy>
+    </target>
+ 
+
+    <target name="package" depends="build" description="Bundles up pre-built artifacts into a distribution">
+        <echo message="Creating required directories..."/>
+        <mkdir dir="${deploy.dir}"/>
+
+        <echo message="Packaging up Solr..."/>
+		<copy todir="${deploy.dir}/solr">
+            <fileset dir="${basedir}/lucene-solr/solr/">
+                <include name="server/**"/>
+            </fileset>
+		</copy>
+
+		<copy todir="${deploy.dir}/solr">
+            <fileset dir="${basedir}/lucene-solr/solr/">
+                <include name="bin/solr"/>
+            </fileset>
+		</copy>
+
+		<copy todir="${deploy.dir}/solr/server">
+            <fileset dir="${basedir}/configs/" includes="solr/**" />
+        </copy>
+
+        <echo message="Integrating skg..."/>
+        <copy todir="${deploy.dir}/solr/server/lib">
+            <fileset dir="${basedir}/skg/target">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+
+        <echo message="Integrating Startup Script"/>
+        <copy todir="${deploy.dir}">
+            <fileset dir="${basedir}/configs">
+                <include name="*.sh"/>
+            </fileset>
+        </copy>
+    </target>
+    
+</project>

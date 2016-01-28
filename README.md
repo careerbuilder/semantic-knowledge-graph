@@ -1,1 +1,1 @@
-# semantic-knowledge-graph
+semantic-knowledge-graph
