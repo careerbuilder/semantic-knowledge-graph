@@ -1,13 +1,11 @@
-cd relatedness/
+cd skg/
 mvn clean
 mvn package
 cd ../
-cd solr-text-tagger
-cd ../
 ant package-nobuild
 cd deploy
-chmod +x restart-solrfst.sh
-chmod +x restart-solrfst-dbg.sh
-chmod +x solrfst/bin/solr
-./restart-solrfst-dbg.sh
+chmod +x restart-solr.sh
+chmod +x restart-solr-dbg.sh
+chmod +x solr/bin/solr
+./restart-solr-dbg.sh
 
