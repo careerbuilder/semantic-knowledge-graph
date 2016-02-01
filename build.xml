@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="cb-semantic-search-parser" default="" basedir="./">
     <property name="deploy.dir" value="deploy" />
-    <property name="version.solr" value="lucene_solr_5_1_0" />
+	<property name="version.solr" value="releases/lucene-solr/5.1.0" />
     <property name="git.solr" value="https://github.com/apache/lucene-solr" />
     <property name="local.dir.solr" value="lucene-solr" />
     <property name="local.dir.patches" value="patches" />
