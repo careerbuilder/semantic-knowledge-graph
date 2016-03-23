@@ -12,6 +12,7 @@ public class FacetFieldAdapter {
     public String field;
     public String baseField;
     private String facetFieldExtension;
+    private String facetFieldKey;
     private String globalFacetFieldExtension;
     private String facetFieldDelimiter= "-";
     private String facetFieldValueDelimiter = "^";
@@ -26,6 +27,7 @@ public class FacetFieldAdapter {
     {
         this.context = context;
         this.facetFieldExtension = context.parameterSet.invariants.get(field + ".facet-field", "");
+        this.facetFieldKey = context.parameterSet.invariants.get(field + ".key", "");
         this.globalFacetFieldExtension = context.parameterSet.invariants.get("facet-field-extension", "cs");
         this.facetFieldDelimiter = context.parameterSet.invariants.get("facet-field-delimiter", "-");
         this.facetFieldValueDelimiter = context.parameterSet.invariants.get("facet-field-value-delimiter", "^");
@@ -52,8 +54,8 @@ public class FacetFieldAdapter {
 
     public String getStringValue(SimpleOrderedMap<Object> bucket)
     {
-        String value = (String) bucket.get("val");
-        return value.replace(facetFieldValueDelimiter, " ");
+        SimpleOrderedMap<String> mapValues = getMapValue(bucket);
+        return mapValues.get(this.facetFieldKey);
     }
 
     private String buildField(String field) {

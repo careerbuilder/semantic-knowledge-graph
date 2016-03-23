@@ -77,6 +77,21 @@ public class FacetFieldAdapterTest {
         paramMap.put("skills.v3.facet-field", "id-title");
         paramMap.put("skills.v3.top.facet-field", "id-title");
         paramMap.put("joblevel.v1.facet-field", "level-description");
+        paramMap.put("carotene.v1.key", "id");
+        paramMap.put("carotene.v1.top.key", "id");
+        paramMap.put("carotene.v2.key", "id");
+        paramMap.put("carotene.v2.top.key", "id");
+        paramMap.put("carotene.v2_2.key", "id");
+        paramMap.put("carotene.v2_2.top.key", "id");
+        paramMap.put("onet.v15.key", "id");
+        paramMap.put("onet.v15.top.key", "id");
+        paramMap.put("onet.v17.key", "id");
+        paramMap.put("onet.v17.top.key", "id");
+        paramMap.put("skills.v2.key", "id");
+        paramMap.put("skills.v2.top.key", "id");
+        paramMap.put("skills.v3.key", "id");
+        paramMap.put("skills.v3.top.key", "id");
+        paramMap.put("joblevel.v1.key", "level");
 
         new MockUp<FieldChecker>()
         {
@@ -155,7 +170,7 @@ public class FacetFieldAdapterTest {
         resultBucket.add("val", "99^testdescription");
         String actual = target.getStringValue(resultBucket);
 
-        Assert.assertEquals("99 testdescription", actual);
+        Assert.assertEquals("99", actual);
     }
 
     @Test
@@ -182,7 +197,7 @@ public class FacetFieldAdapterTest {
         resultBucket.add("val", "99^testtitle");
         String actual = target.getStringValue(resultBucket);
 
-        Assert.assertEquals("99 testtitle", actual);
+        Assert.assertEquals("99", actual);
     }
 
     @Test
@@ -210,7 +225,7 @@ public class FacetFieldAdapterTest {
         resultBucket.add("val", "99^testtitle");
         String actual = target.getStringValue(resultBucket);
 
-        Assert.assertEquals("99 testtitle", actual);
+        Assert.assertEquals("99", actual);
     }
 
 }
