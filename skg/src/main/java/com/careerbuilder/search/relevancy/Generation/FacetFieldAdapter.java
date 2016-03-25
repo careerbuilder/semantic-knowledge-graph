@@ -55,6 +55,10 @@ public class FacetFieldAdapter {
     public String getStringValue(SimpleOrderedMap<Object> bucket)
     {
         SimpleOrderedMap<String> mapValues = getMapValue(bucket);
+        if(mapValues == null)
+        {
+            return (String) bucket.get("val");
+        }
         return mapValues.get(this.facetFieldKey);
     }
 
