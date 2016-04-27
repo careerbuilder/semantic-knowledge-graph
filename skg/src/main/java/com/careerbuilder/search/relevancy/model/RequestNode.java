@@ -9,7 +9,7 @@ public class RequestNode {
     public String [] values;
     public List<SimpleOrderedMap<String>> normalizedValues;
     public SortType sort;
-    public int limit;
+    public int limit = -1;
     public boolean discover_values;
     public RequestNode[] compare;
 

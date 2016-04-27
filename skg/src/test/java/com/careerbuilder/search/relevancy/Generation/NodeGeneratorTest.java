@@ -152,9 +152,18 @@ public class NodeGeneratorTest {
     }
 
     @Test
-    public void merge() throws IOException
+    public void merge_someRequests() throws IOException
     {
+        FacetRunner runner = new FacetRunner(context, adapter, "testField", 0, 10);
         RequestNode request = new RequestNode(null, "type");
+        request.values = new String [] { "test1", "test2"};
+        runner.buckets = new LinkedList<>();
+        SimpleOrderedMap<Object> nullMap = new SimpleOrderedMap<>();
+        SimpleOrderedMap<Object> genValue = new SimpleOrderedMap<>();
+        genValue.add("val", "testValue");
+        runner.buckets.add(nullMap);
+        runner.buckets.add(genValue);
+
         NodeGenerator target = new NodeGenerator();
         new Expectations(target){{
             Deencapsulation.invoke(target, "addPassedInValues", request, response); returns(1);
@@ -162,6 +171,49 @@ public class NodeGeneratorTest {
         }};
 
         Deencapsulation.invoke(target, "mergeResponseValues", request, response, runner);
+
+        Assert.assertEquals(3, response.values.length);
+    }
+
+    @Test
+    public void merge_nullRequests() throws IOException
+    {
+        FacetRunner runner = new FacetRunner(context, adapter, "testField", 0, 10);
+        RequestNode request = new RequestNode(null, "type");
+        runner.buckets = new LinkedList<>();
+        SimpleOrderedMap<Object> nullMap = new SimpleOrderedMap<>();
+        SimpleOrderedMap<Object> genValue = new SimpleOrderedMap<>();
+        genValue.add("val", "testValue");
+        runner.buckets.add(nullMap);
+        runner.buckets.add(genValue);
+
+        NodeGenerator target = new NodeGenerator();
+        new Expectations(target){{
+            Deencapsulation.invoke(target, "addPassedInValues", request, response); returns(1);
+            Deencapsulation.invoke(target, "addGeneratedValues", response, runner, 1);
+        }};
+
+        Deencapsulation.invoke(target, "mergeResponseValues", request, response, runner);
+
+        Assert.assertEquals(1, response.values.length);
+    }
+
+    @Test
+    public void merge_nullGenerated() throws IOException
+    {
+        FacetRunner runner = new FacetRunner(context, adapter, "testField", 0, 10);
+        RequestNode request = new RequestNode(null, "type");
+        request.values = new String [] { "test1", "test2"};
+
+        NodeGenerator target = new NodeGenerator();
+        new Expectations(target){{
+            Deencapsulation.invoke(target, "addPassedInValues", request, response); returns(1);
+            Deencapsulation.invoke(target, "addGeneratedValues", response, runner, 1);
+        }};
+
+        Deencapsulation.invoke(target, "mergeResponseValues", request, response, runner);
+
+        Assert.assertEquals(2, response.values.length);
     }
 
     @Test
@@ -189,6 +241,34 @@ public class NodeGeneratorTest {
         Deencapsulation.invoke(target, "addGeneratedValues", response, runner, 0);
 
         Assert.assertEquals(2, response.values.length);
+        for(int i = 0; i < expecteds.length; ++i) {
+            Assert.assertTrue(response.values[i].equals(expecteds[i]));
+            Assert.assertTrue(MapUtility.mapsEqual(response.values[i].normalizedValue, expecteds[i].normalizedValue));
+        }
+    }
+
+    @Test
+    public void addGeneratedValues_withNull() throws IOException
+    {
+        ResponseNode response = new ResponseNode("testField");
+        response.values = new ResponseValue[1];
+
+        runner.buckets = new LinkedList<>();
+        SimpleOrderedMap<Object> generatedValue1 = new SimpleOrderedMap<>();
+        generatedValue1.add("val", null);
+        SimpleOrderedMap<Object> generatedValue2 = new SimpleOrderedMap<>();
+        generatedValue2.add("val", "generatedValue2");
+        runner.buckets.add(generatedValue1);
+        runner.buckets.add(generatedValue2);
+        ResponseValue [] expecteds = new ResponseValue[1];
+        expecteds[0] = new ResponseValue("generatedValue2");
+        expecteds[0].normalizedValue = new SimpleOrderedMap<>();
+        expecteds[0].normalizedValue.add("name", "generatedValue2");
+
+        NodeGenerator target = new NodeGenerator();
+        Deencapsulation.invoke(target, "addGeneratedValues", response, runner, 0);
+
+        Assert.assertEquals(1, response.values.length);
         for(int i = 0; i < expecteds.length; ++i) {
             Assert.assertTrue(response.values[i].equals(expecteds[i]));
             Assert.assertTrue(MapUtility.mapsEqual(response.values[i].normalizedValue, expecteds[i].normalizedValue));

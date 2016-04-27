@@ -76,7 +76,7 @@ public class RequestTreeRecurser {
                 request.discover_values = true;
             }
             int limit = request.values == null || request.values.length == 0 ? DEFAULT_REQUEST_LIMIT : request.values.length;
-            request.limit = request.limit == 0 ? limit : request.limit;
+            request.limit = request.limit == -1 ? limit : request.limit;
         }
     }
 }
