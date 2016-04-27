@@ -31,7 +31,8 @@ public class NodeGenerator implements RecursionOp {
     }
 
     private void mergeResponseValues(RequestNode request, ResponseNode resp, FacetRunner runner) {
-        int genLength = runner == null ? 0 : runner.buckets == null ? 0 :runner.buckets.size();
+        int genLength = runner == null ? 0 : runner.buckets == null ? 0 :
+                (int)runner.buckets.stream().filter(b -> runner.adapter.getStringValue(b) != null).count();
         int requestValsLength = request.values == null ? 0 : request.values.length;
         resp.values = new ResponseValue[requestValsLength + genLength];
         int k = addPassedInValues(request, resp);
@@ -53,9 +54,12 @@ public class NodeGenerator implements RecursionOp {
 
     private void addGeneratedValues(ResponseNode resp, FacetRunner runner, int k) {
         for (SimpleOrderedMap<Object> bucket: runner.buckets) {
-            ResponseValue respValue = new ResponseValue(runner.adapter.getStringValue(bucket));
-            respValue.normalizedValue = runner.adapter.getMapValue(bucket);
-            resp.values[k++] = respValue;
+            if(runner.adapter.getStringValue(bucket) != null)
+            {
+                ResponseValue respValue = new ResponseValue(runner.adapter.getStringValue(bucket));
+                respValue.normalizedValue = runner.adapter.getMapValue(bucket);
+                resp.values[k++] = respValue;
+            }
         }
     }
 
