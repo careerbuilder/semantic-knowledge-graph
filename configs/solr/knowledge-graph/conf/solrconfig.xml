@@ -47,12 +47,15 @@
 		</lst>
 		<lst name="invariants">
 			<!-- fallback field defines which field to query in case foreground returns less
-				 than mincount -->
+				 than min_popularity -->
 			<str name="field.v1.fallback">content</str>
 			<str name="wt">skg</str>
-			<!-- default facet fields. when faceting, these values will be appended to the
-				 field. ".cs" will also be appended to all field facet queries-->
+			<!-- default facet fields. these map search fields to facet fields by appending to the search
+				 field. ".cs" will also be appended to all facet queries-->
 			<str name="field.facet-field">id-name</str>
+			<!-- key value for searching search fields based on generated nodes. should be a facet value.
+				 e.g. key = id implies when faceting, the id value will be used to search and score the generated node-->
+			<str name="field.v1.key">id</str>
 		</lst>
 	</requestHandler>
 
