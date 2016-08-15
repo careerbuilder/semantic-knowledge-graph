@@ -1,4 +1,4 @@
-cd skg/
+cd knowledge-graph/
 mvn clean
 mvn package
 cd ../
