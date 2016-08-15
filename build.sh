@@ -1,7 +1,7 @@
 ant pull
 cd lucene-solr
 ant ivy-bootstrap
-cd ../skg/
+cd ../knowledge-graph/
 mvn clean
 mvn package
 cd ../
