@@ -1,0 +1,34 @@
+<schema name="blank" version="1.5">
+
+  <uniqueKey>id</uniqueKey>
+
+  <fields>
+	  <field name="content" type="text" indexed="true" stored="false" required="false" multiValued="true" />
+	  <field name="field.v1" type="keyword" indexed="true" stored="false" required="false" multiValued="true"/>
+	  <field name="field.v1.id-name.cs" type="keywordcs" indexed="true" stored="false" required="false" multiValued="false" docValues="true"/> 
+  </fields>
+  <types>
+	<fieldType name="keywordcs" class="solr.StrField" sortMissingLast="true">
+    </fieldType>
+
+    <fieldType name="keyword" class="solr.TextField" sortMissingLast="true" positionIncrementGap="100" >
+        <analyzer>
+			<tokenizer class="solr.KeywordTokenizerFactory"/>
+            <filter class="solr.ASCIIFoldingFilterFactory"/>
+            <filter class="solr.LowerCaseFilterFactory" />
+        </analyzer>
+    </fieldType>
+
+    <fieldType name="text" class="solr.TextField" positionIncrementGap="100">
+		<analyzer>
+			<filter class="solr.ASCIIFoldingFilterFactory"/>
+			<charFilter class="solr.PatternReplaceCharFilterFactory" pattern="&lt;[\/]{0,1}[a-zA-Z]+[\s]{0,1}[\/]{0,1}&gt;" replacement=" | "/>
+			<charFilter class="solr.HTMLStripCharFilterFactory"/>
+			<charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\.\,\;\:\?\!\\\/]\s" replacement=" | "/>
+            <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+            <filter class="solr.LowerCaseFilterFactory" />
+	    <filter class="solr.StopFilterFactory" words="filter_tokens.txt" ignoreCase="true"/>
+        </analyzer>
+    </fieldType>
+  </types>
+</schema>
