@@ -6,7 +6,7 @@
     <property name="local.dir.solr" value="lucene-solr" />
     <property name="local.dir.patches" value="patches" />
     <!-- Will likely need to fork SolrTextTagger in future and modify below -->
-    <property name="local.dir.skg" value="skg" />
+    <property name="local.dir.knowledge-graph" value="knowledge-graph" />
 
     <!-- Make Maven Usable -->
     <property name="maven.executable" value="mvn" />
@@ -66,7 +66,7 @@
 
     <target name="build" depends="patch" description="Builds all dependencies">
         <ant antfile="build.xml" dir="${basedir}/${local.dir.solr}/solr" target="example" />
-        <exec executable="${maven.executable}" dir="${basedir}/${local.dir.skg}">
+        <exec executable="${maven.executable}" dir="${basedir}/${local.dir.knowledge-graph}">
             <arg value="package" />
         </exec>
     </target>
@@ -92,9 +92,9 @@
             <fileset dir="${basedir}/configs/" includes="solr/**" />
         </copy>
 
-        <echo message="Integrating skg..."/>
+        <echo message="Integrating knowledge-graph..."/>
         <copy todir="${deploy.dir}/solr/server/lib">
-            <fileset dir="${basedir}/skg/target">
+            <fileset dir="${basedir}/knowledge-graph/target">
                 <include name="*.jar"/>
             </fileset>
         </copy>
@@ -129,9 +129,9 @@
             <fileset dir="${basedir}/configs/" includes="solr/**" />
         </copy>
 
-        <echo message="Integrating skg..."/>
+        <echo message="Integrating knowledge-graph..."/>
         <copy todir="${deploy.dir}/solr/server/lib">
-            <fileset dir="${basedir}/skg/target">
+            <fileset dir="${basedir}/knowledge-graph/target">
                 <include name="*.jar"/>
             </fileset>
         </copy>
