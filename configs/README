@@ -1,0 +1,4 @@
+To feed the example, run "./feed.sh ./ knowledge-graph" in this directory.
+
+Example query:
+{"queries":["field.v1:\"data scientist\""],"min_popularity":0.0,"compare":[{"type":"field.v1","limit":5, "sort":"relatedness"}]}

@@ -3,14 +3,17 @@
   <uniqueKey>id</uniqueKey>
 
   <fields>
-	  <field name="content" type="text" indexed="true" stored="false" required="false" multiValued="true" />
+	  <field name="id" type="keyword" indexed="true" stored="true" required="false" multiValued="false" />
+<field name="content" type="text" indexed="true" stored="false" required="false" multiValued="true" />
 	  <field name="field.v1" type="keyword" indexed="true" stored="false" required="false" multiValued="true"/>
-	  <field name="field.v1.id-name.cs" type="keywordcs" indexed="true" stored="false" required="false" multiValued="false" docValues="true"/> 
+	  <field name="field.v1.id-name" type="keyword-case-sens" indexed="true" stored="false" required="false" multiValued="true" docValues="true"/> 
+	  <field name="_version_" type="long" indexed="true" stored="true"/>
   </fields>
   <types>
-	<fieldType name="keywordcs" class="solr.StrField" sortMissingLast="true">
+	<fieldType name="keyword-case-sens" class="solr.StrField" sortMissingLast="true">
     </fieldType>
-
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
+    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
     <fieldType name="keyword" class="solr.TextField" sortMissingLast="true" positionIncrementGap="100" >
         <analyzer>
 			<tokenizer class="solr.KeywordTokenizerFactory"/>
@@ -27,7 +30,6 @@
 			<charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\.\,\;\:\?\!\\\/]\s" replacement=" | "/>
             <tokenizer class="solr.WhitespaceTokenizerFactory"/>
             <filter class="solr.LowerCaseFilterFactory" />
-	    <filter class="solr.StopFilterFactory" words="filter_tokens.txt" ignoreCase="true"/>
         </analyzer>
     </fieldType>
   </types>

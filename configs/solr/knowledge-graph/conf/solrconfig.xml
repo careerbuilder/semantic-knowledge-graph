@@ -13,7 +13,7 @@
   <updateHandler class="solr.DirectUpdateHandler2">
 	<autoSoftCommit>
        <maxTime>100000</maxTime>
-     </autoSoftCommit>
+    </autoSoftCommit>
 
     <updateLog>
       <str name="dir">${solr.ulog.dir:}</str>
@@ -38,9 +38,9 @@
      </lst>
     </requestHandler>
 
-	<queryResponseWriter name="skg" class="com.careerbuilder.search.relevancy.responsewriter.RelatednessResponseWriter"/>
+	<queryResponseWriter name="skg" class="com.careerbuilder.search.relevancy.responsewriter.KnowledgeGraphResponseWriter"/>
 	
-  	<requestHandler name="/rel" class="com.careerbuilder.search.relevancy.RelatednessRequestHandler">
+  	<requestHandler name="/rel" class="com.careerbuilder.search.relevancy.KnowledgeGraphHandler">
 		<lst name="defaults">
 			<str name="df">content</str>
 			<str name="defType">edismax</str>
@@ -50,9 +50,8 @@
 				 than min_popularity -->
 			<str name="field.v1.fallback">content</str>
 			<str name="wt">skg</str>
-			<!-- default facet fields. these map search fields to facet fields by appending to the search
-				 field. ".cs" will also be appended to all facet queries-->
-			<str name="field.facet-field">id-name</str>
+			<!-- default facet fields. these map search fields to facet fields by appending to the search field.--> 
+			<str name="field.v1.facet-field">id-name</str>
 			<!-- key value for searching search fields based on generated nodes. should be a facet value.
 				 e.g. key = id implies when faceting, the id value will be used to search and score the generated node-->
 			<str name="field.v1.key">id</str>
@@ -60,6 +59,15 @@
 	</requestHandler>
 
   <requestHandler name="/update" class="solr.UpdateRequestHandler" >
+	<lst name="defaults">
+	  <bool name="f.field.v1.split">true</bool>
+      <str name="f.field.v1.encapsulator">"</str>
+      <str name="f.field.v1.separator">|</str>
+	  <bool name="f.field.v1.id-name.split">true</bool>
+      <str name="f.field.v1.id-name.encapsulator">"</str>
+      <str name="f.field.v1.id-name.separator">|</str>
+	</lst>
+
   </requestHandler>
 
   <requestHandler name="/analysis/field" 
