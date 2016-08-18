@@ -1,0 +1,11 @@
+id,content,field.v1,field.v1.id-name
+1,This is an example,1|data scientist,1^data scientist
+2,data analytics,2|data analytics|1|data scientist,2^data analytics|1^data scientist
+3,data analytics,2|data analytics|1|data scientist,2^data analytics|1^data scientist
+4,data analytics,2|data analytics|1|data scientist,2^data analytics|1^data scientist
+5,data analytics,2|data analytics|1|data scientist,2^data analytics|1^data scientist
+6,something else,3|machine learning,3^machine learning
+7,something else,3|machine learning,3^machine learning
+8,something else,3|machine learning,3^machine learning
+9,something else,3|machine learning,3^machine learning
+10,something else,3|machine learning,3^machine learning
