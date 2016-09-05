@@ -1,11 +1,28 @@
 #Semantic Knowledge Graph
 *A graph structure, build automatically from a corpus of data, for traversing and measuring relationships within a domain*
 
-The Semantic Knowledge Graph serves as a data scientist's toolkit, allowing you to discover and compare any entities modelled within a corpus of data from any domain. For example, if you indexed a corpus of job postings, you could figure out what the most related job titles are for the query "account manager", and subsequently what the top skills are for each of those job titles. If you were searching for restaurants and had a list keywords you want to rank based upon how similar they are to a combination of three different skills ? The Semantic Knowledge Graph will allow you to slice and dice the universe of terms and entites represented within your corpus in order to discover as many of these insights as you have the time and curiosity to pursue.
+The Semantic Knowledge Graph serves as a data scientist's toolkit, allowing you to discover and compare any entities modeled within a corpus of data from any domain. For example, if you indexed a corpus of job postings, you could figure out what the most related job titles are for the phrase "account manager", and subsequently what the top skills are for each of those job titles. You can also use the system to rank a list of entities or keywords based upon their statistical relationship with any other group of entities or terms, and you can traverse these relationships any number of levels deep.  The Semantic Knowledge Graph will allow you to slice and dice the universe of terms and entites represented within your corpus in order to discover as many of these insights as you have the time and curiosity to pursue.
 
 The Semantic Knowledge Graph is packaged as a request handler plugin for the popular Apache Solr search engine. Fundamentally, you must create a schema representing your corpus of data (from any domain), send the corpus of documents to Solr (script to do this is included), and then you can send queries to the Semantic Knowledge Graph request handler to discover and/or score relationships.
 
-#Examples (from the job search domain):
+## License and Citation
+
+The Semantic Knowledge Graph source code is licensed under the [ASL 2.0 License](https://github.com/careerbuilder/semantic-knowledge-graph/blob/master/LICENSE). 
+
+A research paper describing the Semantic Knowledge Graph is being published in the proceedings of the 2016 IEEE 3rd International Conference on Data Science and Advanced Analytics: 
+
+[The Semantic Knowledge Graph: A compact, auto-generated model for real-time traversal and ranking of any relationship within a domain](https://arxiv.org/abs/1609.00464).
+
+Please cite the Semantic Knowledge Graph in your publications if it helps your research:
+
+    @article{grainger2016SemanticKnowledgeGraph,
+      Author = {Grainger, Trey and AlJadda, Khalifeh and Korayem, Mohammed and Smith, Andries},
+      Journal = {arXiv preprint arXiv:1609.00464},
+      Title = {The Semantic Knowledge Graph: A compact, auto-generated model for real-time traversal and ranking of any relationship within a domain},
+      Year = {2016}
+    }
+
+#Usage (examples from the job search domain):
 
 *Request:*
 ```
@@ -102,7 +119,7 @@ Response:
 }
 ```
 
-#Available Request Parameters
+#Available Request Options
 **queries**	String[]  
 A set of Solr queries which will be used to generate entities for scoring. If no foreground queries are supplied, these queries will also be used to score the entities. Multiple queries are merged to find the intersection between them (equivalent of a boolean AND query). See the types parameter for query field types. 
 
