@@ -1,0 +1,39 @@
+<schema name="blank" version="1.5">
+
+  <uniqueKey>id</uniqueKey>
+  <!-- Fits to example.csv-->
+  <fields>
+	 <field name="id" type="keyword" indexed="true" stored="true" required="false" multiValued="false" />
+    <field name="col1" type="text" indexed="true" stored="false" required="false" multiValued="true" />
+	 <field name="col2" type="keyword" indexed="true" stored="false" required="false" multiValued="true"/> 
+	 <field name="col3" type="keyword" indexed="true" stored="false" required="false" multiValued="true"/>  
+	 <field name="_version_" type="long" indexed="true" stored="true"/>  
+  </fields>
+  
+  
+  <types>
+	<fieldType name="keyword-case-sens" class="solr.StrField" sortMissingLast="true">
+    </fieldType>
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
+    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="keyword" class="solr.TextField" sortMissingLast="true" positionIncrementGap="100" >
+        <analyzer>
+			<tokenizer class="solr.KeywordTokenizerFactory"/>
+            <filter class="solr.ASCIIFoldingFilterFactory"/>
+            <filter class="solr.LowerCaseFilterFactory" />
+        </analyzer>
+    </fieldType>
+
+    <fieldType name="text" class="solr.TextField" positionIncrementGap="100">
+		<analyzer>
+			<filter class="solr.ASCIIFoldingFilterFactory"/>
+			<charFilter class="solr.PatternReplaceCharFilterFactory" pattern="&lt;[\/]{0,1}[a-zA-Z]+[\s]{0,1}[\/]{0,1}&gt;" replacement=" | "/>
+			<charFilter class="solr.HTMLStripCharFilterFactory"/>
+			<charFilter class="solr.PatternReplaceCharFilterFactory" pattern="[\.\,\;\:\?\!\\\/]\s" replacement=" | "/>
+            <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+            <filter class="solr.LowerCaseFilterFactory" />
+        </analyzer>
+    </fieldType>
+  </types>
+</schema>
+    
